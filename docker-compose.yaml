@@ -1,0 +1,26 @@
+version: '3.2'
+
+services:
+
+  mongo:
+    image: mongo
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: 'dbuser'
+      MONGO_INITDB_ROOT_PASSWORD: 'pwd4mongo'
+    ports:
+      - 27017:27017
+    volumes:
+      - mongo-db:/data/db
+  
+  docker-registry:
+    image: registry
+    restart: always
+    ports:
+      - 5000:5000
+    volumes:
+      - ./configs/docker-registry/config.yml:/etc/docker/registry/config.yml:ro
+    
+
+volumes:
+  mongo-db:

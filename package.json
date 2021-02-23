@@ -1,0 +1,60 @@
+{
+  "name": "mds-cloud-docker-minion",
+  "version": "1.0.0",
+  "description": "A worker minion to handle docker specific work from the mdsCloudServerlessFunctions application",
+  "scripts": {
+    "server": "./bin/server",
+    "test": "NODE_ENV=test mocha",
+    "test-cov": "NODE_ENV=test nyc mocha",
+    "test-watch": "NODE_ENV=test nodemon --exec mocha",
+    "test-watch-cov": "NODE_ENV=test nodemon --exec \"nyc mocha\"",
+    "open-coverage-linux": "nohup xdg-open ./coverage/lcov-report/index.html >/dev/null 2>&1 &",
+    "lint": "eslint 'src/**'"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MadDonkeySoftware/mdsCloudDockerMinion.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/MadDonkeySoftware/mdsCloudDockerMinion/issues"
+  },
+  "homepage": "https://github.com/MadDonkeySoftware/mdsCloudDockerMinion#readme",
+  "dependencies": {
+    "@grpc/grpc-js": "^1.2.12",
+    "@grpc/proto-loader": "^0.6.0",
+    "@maddonkeysoftware/mds-cloud-sdk-node": "^0.1.0",
+    "@maddonkeysoftware/orid-node": "^0.1.0",
+    "axios": "^0.21.1",
+    "body-parser": "^1.19.0",
+    "bunyan": "^1.8.15",
+    "del": "^6.0.0",
+    "dockerode": "^3.2.1",
+    "express": "^4.17.1",
+    "express-fileupload": "^1.2.1",
+    "jsonschema": "^1.4.0",
+    "jsonwebtoken": "^8.5.1",
+    "lodash": "^4.17.21",
+    "luxon": "^1.26.0",
+    "mongodb": "^3.6.6",
+    "shelljs": "^0.8.4",
+    "tar-fs": "^2.1.1",
+    "unzipper": "^0.10.11",
+    "url-join": "^4.0.1"
+  },
+  "devDependencies": {
+    "chai": "^4.3.4",
+    "chai-as-promised": "^7.1.1",
+    "eslint": "^7.24.0",
+    "eslint-config-airbnb-base": "^14.2.1",
+    "eslint-plugin-import": "^2.22.1",
+    "mocha": "^8.3.2",
+    "nodemon": "^2.0.7",
+    "nyc": "^15.1.0",
+    "proxyquire": "^2.1.3",
+    "sinon": "^10.0.0",
+    "sinon-chai": "^3.6.0",
+    "supertest": "^6.1.3"
+  }
+}

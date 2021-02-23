@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "com.maddonkeysoftware.mdscloud.dockerminion";
+option java_outer_classname = "MdsCloudDockerMinion";
+option objc_class_prefix = "HLW";
+
+package mdsCloud.dockerMinion;
+
+service Interchange {
+  rpc Version (VersionArgs) returns (VersionResponse) {}
+  rpc Process (RequestArgs) returns (ProcessResponse) {}
+}
+
+message VersionArgs {
+}
+
+message VersionResponse {
+  string version = 1;
+}
+
+message RequestArgs {
+  string userPayload = 1;
+}
+
+message ProcessResponse {
+  string userResponse = 1;
+}
