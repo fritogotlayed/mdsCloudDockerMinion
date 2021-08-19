@@ -89,6 +89,7 @@ const buildContainerHandler = async (request, response) => {
       localFilePath,
       runtime: body.runtime,
       entryPoint: body.entryPoint,
+      context: body.context,
     });
 
     const msg = {

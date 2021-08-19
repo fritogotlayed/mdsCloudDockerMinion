@@ -1,7 +1,7 @@
 const jsonschema = require('jsonschema');
 const runtimes = require('../runtimes');
 
-const createRequestSchema = {
+const schema = {
   id: '/BuildContainerRequest',
   title: 'BuildContainerRequest',
   description: 'Create a container image for the end users code',
@@ -18,14 +18,10 @@ const createRequestSchema = {
       type: 'string',
       description: 'The unique identifier for the account',
     },
-    // accountId: {
-    //   type: 'string',
-    //   description: 'The unique identifier for the account',
-    // },
-    // key: {
-    //   type: 'string',
-    //   description: '',
-    // },
+    context: {
+      type: 'string',
+      description: 'Any contextual data to send to this function upon execution',
+    },
   },
   required: ['entryPoint', 'runtime', 'functionId'],
   additionalProperties: false,
@@ -33,7 +29,7 @@ const createRequestSchema = {
 
 const validate = (data) => {
   const validator = new jsonschema.Validator();
-  return validator.validate(data, createRequestSchema);
+  return validator.validate(data, schema);
 };
 
 module.exports = {

@@ -21,7 +21,7 @@ const findEntrypoint = (dir) => common.readdir(dir)
     return `${dir}${path.sep}${files[0]}`;
   });
 
-const prepSourceForContainerBuild = async (localPath, entryPoint) => {
+const prepSourceForContainerBuild = async (localPath, entryPoint, userContext) => {
   const logger = globals.getLogger();
 
   try {
@@ -42,7 +42,7 @@ const prepSourceForContainerBuild = async (localPath, entryPoint) => {
 
     // Generate entry file
     const entryFilePath = `${localPath}${path.sep}mdsEntry.js`;
-    const renderedTemplate = entryPointTemplate.generateTemplate(entryPoint);
+    const renderedTemplate = entryPointTemplate.generateTemplate(entryPoint, userContext);
     await common.writeFile(entryFilePath, renderedTemplate);
 
     // Generate Dockerfile
