@@ -7,6 +7,7 @@
   * @typedef {Function} PrepSourceForContainerBuild
   * @param {string} localPath the root location for the source code
   * @param {string} entryPoint the path and function to execute when executing the function
+  * @param {string} userContext user defined context provided to the user function
   */
 
 /**

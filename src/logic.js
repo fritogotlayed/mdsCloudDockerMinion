@@ -262,6 +262,7 @@ const self = {
    * @param {string} meta.localFilePath The path to the local source archive
    * @param {string} meta.runtime The runtime to execute the source
    * @param {string} meta.entryPoint The starting point for code execution
+   * @param {String} [meta.context] context to send to the remote procedure
    */
   buildFunction: async (meta) => {
     // TODO: handle concurrent builds idempotent-ly
@@ -273,6 +274,7 @@ const self = {
       localFilePath,
       runtime,
       entryPoint,
+      context,
     } = meta;
 
     let sourcePath;
@@ -298,7 +300,7 @@ const self = {
       const sourceRootPath = await tools.findEntrypoint(sourcePath);
       logger.debug({ sourceRootPath }, 'Source extraction complete');
 
-      await tools.prepSourceForContainerBuild(sourceRootPath, entryPoint);
+      await tools.prepSourceForContainerBuild(sourceRootPath, entryPoint, context);
       const containerMeta = await self.buildImage(sourceRootPath, metadata);
       logger.debug({ sourceRootPath, metadata, containerMeta }, 'Container build complete.');
 

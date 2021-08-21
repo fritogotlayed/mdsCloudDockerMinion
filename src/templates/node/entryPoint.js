@@ -1,4 +1,4 @@
-const generateTemplate = (entryPoint) => {
+const generateTemplate = (entryPoint, userContext) => {
   const parts = entryPoint.split(':');
 
   /* eslint-disable no-template-curly-in-string */
@@ -12,6 +12,7 @@ const protoLoader = require('@grpc/proto-loader');
 const userModule = require('./${parts[0]}');
 
 const PROTO_PATH = ${protoLine};
+const USER_CONTEXT = ${userContext}
 const packageDefinition = protoLoader.loadSync(
   PROTO_PATH,
   {
@@ -31,19 +32,25 @@ const readyResultForTransmission = (data) => {
   return JSON.stringify(data);
 };
 
-const readyArgForUsage = (payload) => {
-  if (payload) {
-    return JSON.parse(payload);
+const readyArgForUsage = (inValue) => {
+  let outValue;
+
+  if (inValue) {
+    try {
+      outValue = JSON.parse(inValue);
+    } catch (err) {
+      outValue = inValue;
+    }
   }
-  return null;
+
+  return outValue;
 };
 
 const processHandler = (call, callback) => {
   try {
-    userPayload = readyArgForUsage(
-      call.request.userPayload,
-    );
-    const result = userModule.${parts[1]}(userPayload);
+    const userPayload = readyArgForUsage(call.request.userPayload);
+    const userContext = readyArgForUsage(USER_CONTEXT);
+    const result = userModule.${parts[1]}(userPayload, userContext);
     console.dir({
       mod: '${parts[1]}',
       payload: call.request,
@@ -68,7 +75,7 @@ const processHandler = (call, callback) => {
 };
 
 const versionHandler = (call, callback) => {
-  callback(null, { version: '1.0.0' });
+  callback(null, { version: '1.0.1' });
 };
 
 const main = () => {
