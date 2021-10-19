@@ -1,4 +1,10 @@
-const generateTemplate = (entryPoint, userContext) => {
+const helpers = require('../../helpers');
+
+const generateTemplate = ({
+  entryPoint,
+  userContext,
+  identityUrl = helpers.getEnvVar('MDS_IDENTITY_URL'),
+}) => {
   const parts = entryPoint.split(':');
 
   /* eslint-disable no-template-curly-in-string */
@@ -6,7 +12,7 @@ const generateTemplate = (entryPoint, userContext) => {
   // const indeterminateTypeLine = '`Unable to determine data type for: ${payloadType}`';
   /* eslint-enable no-template-curly-in-string */
 
-  return ` const grpc = require('@grpc/grpc-js');
+  return `const grpc = require('@grpc/grpc-js');
 const protoLoader = require('@grpc/proto-loader');
 
 const userModule = require('./${parts[0]}');
@@ -46,32 +52,63 @@ const readyArgForUsage = (inValue) => {
   return outValue;
 };
 
-const processHandler = (call, callback) => {
+const configureMdsSdk = (accountId, userId, token) => new Promise((resolve, reject) => {
   try {
-    const userPayload = readyArgForUsage(call.request.userPayload);
-    const userContext = readyArgForUsage(USER_CONTEXT);
-    const result = userModule.${parts[1]}(userPayload, userContext);
-    console.dir({
-      mod: '${parts[1]}',
-      payload: call.request,
+    const mdsSdk = require('@maddonkeysoftware/mds-cloud-sdk-node');
+    mdsSdk.initialize({
+      identityUrl: '${identityUrl}',
+      userId,
+      token,
+      verboseEnable: true,
+    }).then(() => {
+      resolve();
     });
 
-    if (result && result.then && typeof result.then === 'function') {
-      console.log('in then code');
-      result
-        .then((innerResult) => {
-          const responseMapping = readyResultForTransmission(innerResult);
-          callback(null, { userResponse: responseMapping });
-        })
-        .catch((err) => callback(err, null));
-    } else {
-      console.log('in direct result code');
-      const responseMapping = readyResultForTransmission(result);
-      callback(null, { userResponse: responseMapping });
-    }
   } catch (err) {
-    callback(err, null);
+    console.log('Error occurred configuring MDS SDK');
+    console.dir(err);
+
+    // If the user code does not include the mdsSdk we don't care
+    if (err.code === 'MODULE_NOT_FOUND') {
+      resolve();
+    }
+    reject(err);
   }
+});
+
+const processHandler = (call, callback) => {
+  configureMdsSdk(call.request.accountId, call.request.userId, call.request.token)
+    .then(() => {
+      const userPayload = readyArgForUsage(call.request.userPayload);
+      const userContext = readyArgForUsage(USER_CONTEXT);
+      const result = userModule.${parts[1]}(userPayload, userContext);
+      console.dir({
+        mod: '${parts[1]}',
+        payload: call.request,
+      });
+
+      if (result && result.then && typeof result.then === 'function') {
+        console.log('in then code');
+        result
+          .then((innerResult) => {
+            const responseMapping = readyResultForTransmission(innerResult);
+            callback(null, { userResponse: responseMapping });
+          })
+          .catch((err) =>{
+            console.log('in nested error handler of processHandler');
+            console.dir(err, {depth: 4});
+            callback(err, null)
+          });
+      } else {
+        console.log('in direct result code');
+        const responseMapping = readyResultForTransmission(result);
+        callback(null, { userResponse: responseMapping });
+      }
+    }).catch((err) => {
+      console.log('in error handler of processHandler');
+      console.dir(err);
+      callback(err, null);
+    })
 };
 
 const versionHandler = (call, callback) => {

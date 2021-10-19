@@ -21,6 +21,8 @@ message VersionResponse {
 
 message RequestArgs {
   string userPayload = 1;
+  string userId = 2;
+  string token = 3;
 }
 
 message ProcessResponse {

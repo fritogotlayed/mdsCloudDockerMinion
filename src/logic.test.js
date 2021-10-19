@@ -836,7 +836,7 @@ describe(__filename, () => {
         chai.expect(fakeLogger.warn.callCount).to.be.equal(1);
         chai.expect(fakeLogger.warn.getCall(0).args).to.deep.equal([
           { err: expectedError },
-          'Error in test code',
+          'Error when removing function.',
         ]);
       }
     });

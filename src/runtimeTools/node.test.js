@@ -86,7 +86,9 @@ describe(__filename, () => {
       ]);
       chai.expect(common.writeFile.getCall(1).args).to.deep.equal([
         'localPath/mdsEntry.js',
-        entryPointTemplate.generateTemplate('entryPoint'),
+        entryPointTemplate.generateTemplate({
+          entryPoint: 'entryPoint',
+        }),
       ]);
       chai.expect(common.writeFile.getCall(2).args).to.deep.equal([
         'localPath/MdsDockerfile',
