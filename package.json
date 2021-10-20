@@ -24,7 +24,7 @@
   "dependencies": {
     "@grpc/grpc-js": "^1.2.12",
     "@grpc/proto-loader": "^0.6.0",
-    "@maddonkeysoftware/mds-cloud-sdk-node": "^0.1.0",
+    "@maddonkeysoftware/mds-cloud-sdk-node": "^0.2.6",
     "@maddonkeysoftware/orid-node": "^0.1.0",
     "axios": "^0.21.1",
     "body-parser": "^1.19.0",

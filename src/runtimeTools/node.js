@@ -3,6 +3,7 @@ const path = require('path');
 
 const common = require('./common');
 const globals = require('../globals');
+const helpers = require('../helpers');
 const entryPointTemplate = require('../templates/node/entryPoint');
 const dockerfileTemplate = require('../templates/node/dockerfile');
 const protoSetupTemplate = require('../templates/node/protoSetup');
@@ -42,7 +43,11 @@ const prepSourceForContainerBuild = async (localPath, entryPoint, userContext) =
 
     // Generate entry file
     const entryFilePath = `${localPath}${path.sep}mdsEntry.js`;
-    const renderedTemplate = entryPointTemplate.generateTemplate(entryPoint, userContext);
+    const renderedTemplate = entryPointTemplate.generateTemplate({
+      entryPoint,
+      userContext,
+      identityUrl: helpers.getEnvVar('MDS_IDENTITY_URL'),
+    });
     await common.writeFile(entryFilePath, renderedTemplate);
 
     // Generate Dockerfile

@@ -8,6 +8,8 @@ const shelljs = require('shelljs');
 const util = require('util');
 const tar = require('tar-fs');
 const luxon = require('luxon');
+const mdsSdk = require('@maddonkeysoftware/mds-cloud-sdk-node');
+const jwt = require('jsonwebtoken');
 
 const repo = require('./repo');
 const globals = require('./globals');
@@ -248,7 +250,7 @@ const self = {
         created: elem.created,
       }));
     } catch (err) /* istanbul ignore next */ {
-      logger.warn({ err }, 'Error in test code');
+      logger.warn({ err }, 'Error occurred when listing functions');
       throw err;
     } finally {
       await database.close();
@@ -364,6 +366,16 @@ const self = {
       try {
         // CALL AND GET RESPONSE
         // TODO: Implement runtime limits
+        logger.debug({ accountId: metadata.accountId }, 'Attempting to get impersonation token for account.');
+        const identityClient = await mdsSdk.getIdentityServiceClient();
+        const impersonateResponse = await identityClient.impersonateUser({
+          accountId: metadata.accountId,
+        });
+        if (!impersonateResponse.token) {
+          throw impersonateResponse;
+        }
+        const { userId } = jwt.decode(impersonateResponse.token);
+
         logger.debug(
           {
             ip: containerData.ip,
@@ -375,12 +387,14 @@ const self = {
         const invokeResult = await grpcClient.invoke({
           hostIp: containerData.ip,
           payload: input,
+          userId,
+          userToken: impersonateResponse.token,
         });
         const endTs = luxon.DateTime.utc();
         logger.debug({ startTs, endTs, diffMs: endTs - startTs }, 'Function execution finished.');
         return invokeResult;
       } catch (err) {
-        logger.warn({ err }, 'Error in test code');
+        logger.warn({ err }, 'Error raised from container when invoking function');
         const retryableErrors = [
           'Could not connect to provided IP',
           'Call cancelled',
@@ -394,7 +408,7 @@ const self = {
         containerManager.releaseFunctionContainer(containerData.handle);
       }
     } catch (err) {
-      logger.warn({ err }, 'Error in test code');
+      logger.warn({ err }, 'Error when invoking function');
       throw err;
     }
   },
@@ -434,7 +448,7 @@ const self = {
         options,
       );
     } catch (err) {
-      logger.warn({ err }, 'Error in test code');
+      logger.warn({ err }, 'Error when removing function.');
       throw err;
     }
   },

@@ -51,19 +51,36 @@ const self = {
    * @param {String} args.hostIp the endpoint the remote procedure is listening at
    * @param {String} args.payload payload to send to the remote procedure
    * @param {String} args.tries Internal retry counter
+   * @param {String} args.userId user id to pre-seed mdsSdk for user execution
+   * @param {String} args.userToken user token to pre-seed mdsSdk for user execution
    */
   invoke: async ({
     definition,
     hostIp,
     payload,
     tries,
+    userId,
+    userToken,
   }) => {
     const def = definition || await self.loadDefinition();
     const client = self.createClientFromGrpcDefinition(def, hostIp);
+    const logger = globals.getLogger();
+    logger.debug({
+      definition,
+      hostIp,
+      payload,
+      tries,
+      userId,
+      userToken,
+    }, 'Attempting to invoke function');
 
     return new Promise((resolve, reject) => {
       const userPayload = self.convertPayloadToString(payload);
-      client.process({ userPayload }, (err, resp) => {
+      client.process({
+        userPayload,
+        userId,
+        token: userToken,
+      }, (err, resp) => {
         if (err) {
           return reject(err);
         }
@@ -87,6 +104,7 @@ const self = {
             hostIp,
             payload,
             tries: currTries + 1,
+            userToken,
           }));
       }
 

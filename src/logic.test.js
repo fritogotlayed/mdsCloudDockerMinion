@@ -8,6 +8,8 @@ const fs = require('fs');
 const shelljs = require('shelljs');
 const dns = require('dns');
 const tar = require('tar-fs');
+const mdsSdk = require('@maddonkeysoftware/mds-cloud-sdk-node');
+const jwt = require('jsonwebtoken');
 
 const globals = require('./globals');
 const logic = require('./logic');
@@ -607,6 +609,11 @@ describe(__filename, () => {
             tagVersion: '1',
           }),
       };
+      const identityFake = {
+        impersonateUser: sinon.stub().resolves({
+          token: 'fakeImpersonationToken',
+        }),
+      };
       sinon.stub(repo, 'getDatabase').resolves({
         close: () => Promise.resolve(),
         getCollection: () => funcColStub,
@@ -617,6 +624,10 @@ describe(__filename, () => {
       });
       sinon.stub(containerManager, 'releaseFunctionContainer').resolves();
       sinon.stub(grpcClient, 'invoke').resolves(expectedResult);
+      sinon.stub(mdsSdk, 'getIdentityServiceClient').resolves(identityFake);
+      sinon.stub(jwt, 'decode').returns({
+        userId: 'impersonatedUser',
+      });
 
       // Act
       const result = await logic.executeFunction(funcId, JSON.stringify({ baz: 1 }));
@@ -636,6 +647,8 @@ describe(__filename, () => {
       chai.expect(grpcClient.invoke.getCall(0).args).to.deep.equal([{
         hostIp: '127.0.0.1',
         payload: JSON.stringify({ baz: 1 }),
+        userId: 'impersonatedUser',
+        userToken: 'fakeImpersonationToken',
       }]);
     });
 
@@ -653,6 +666,11 @@ describe(__filename, () => {
             tagVersion: '1',
           }),
       };
+      const identityFake = {
+        impersonateUser: sinon.stub().resolves({
+          token: 'fakeImpersonationToken',
+        }),
+      };
       sinon.stub(repo, 'getDatabase').resolves({
         close: () => Promise.resolve(),
         getCollection: () => funcColStub,
@@ -667,6 +685,10 @@ describe(__filename, () => {
         .rejects(new Error('Could not connect to provided IP'))
         .onSecondCall()
         .resolves(expectedResult);
+      sinon.stub(mdsSdk, 'getIdentityServiceClient').resolves(identityFake);
+      sinon.stub(jwt, 'decode').returns({
+        userId: 'impersonatedUser',
+      });
 
       // Act
       const result = await logic.executeFunction(funcId, JSON.stringify({ baz: 1 }));
@@ -687,6 +709,8 @@ describe(__filename, () => {
         chai.expect(grpcClient.invoke.getCall(i).args).to.deep.equal([{
           hostIp: '127.0.0.1',
           payload: JSON.stringify({ baz: 1 }),
+          userId: 'impersonatedUser',
+          userToken: 'fakeImpersonationToken',
         }]);
       }
     });
@@ -724,6 +748,54 @@ describe(__filename, () => {
       } catch (err) {
         // Assert
         chai.expect(err.message).to.be.equal('function not found');
+      }
+    });
+
+    it('When function exists but cannot impersonate successfully', async () => {
+      // Arrange
+      const expectedResult = {
+        foo: 'bar',
+      };
+      const funcId = 'testFunctionId';
+      const funcColStub = {
+        findOne: sinon.stub()
+          .withArgs(sinon.match({ id: funcId, deletedOn: { $exists: false } }))
+          .resolves({
+            fullTagName: 'blah/someTag',
+            tagVersion: '1',
+          }),
+      };
+      const identityFake = {
+        impersonateUser: sinon.stub().rejects(new Error('FakeError')),
+      };
+      sinon.stub(repo, 'getDatabase').resolves({
+        close: () => Promise.resolve(),
+        getCollection: () => funcColStub,
+      });
+      sinon.stub(containerManager, 'readyFunctionContainerForImage').resolves({
+        ip: '127.0.0.1',
+        handle: 'containerHandle',
+      });
+      sinon.stub(containerManager, 'releaseFunctionContainer').resolves();
+      sinon.stub(grpcClient, 'invoke').resolves(expectedResult);
+      sinon.stub(mdsSdk, 'getIdentityServiceClient').resolves(identityFake);
+
+      // Act
+      try {
+        await logic.executeFunction(funcId, JSON.stringify({ baz: 1 }));
+      } catch (err) {
+        // Assert
+        chai.expect(err.message).to.equal('FakeError');
+        chai.expect(containerManager.readyFunctionContainerForImage.callCount).to.be.equal(1);
+        chai.expect(containerManager.readyFunctionContainerForImage.getCall(0).args).to.deep.equal([
+          'blah/someTag',
+          '1',
+        ]);
+        chai.expect(containerManager.releaseFunctionContainer.callCount).to.be.equal(1);
+        chai.expect(containerManager.releaseFunctionContainer.getCall(0).args).to.deep.equal([
+          'containerHandle',
+        ]);
+        chai.expect(grpcClient.invoke.callCount).to.be.equal(0);
       }
     });
   });
@@ -836,7 +908,7 @@ describe(__filename, () => {
         chai.expect(fakeLogger.warn.callCount).to.be.equal(1);
         chai.expect(fakeLogger.warn.getCall(0).args).to.deep.equal([
           { err: expectedError },
-          'Error in test code',
+          'Error when removing function.',
         ]);
       }
     });
