@@ -5,9 +5,12 @@ const globals = require('../globals');
 const helpers = require('../helpers');
 const SimpleThrottle = require('../simpleThrottle');
 
-const maxStoppedContainerSeconds = 60;
-const maxRunningContainerSeconds = 15;
+const maxStoppedContainerSeconds = parseInt(helpers.getEnvVar('MDS_MAX_STOPPED_CONTAINER_SEC', '60'), 10);
+const maxRunningContainerSeconds = parseInt(helpers.getEnvVar('MDS_MAX_RUNNING_CONTAINER_SEC', '15'), 10);
+const stopRunningContainers = helpers.getEnvVar('MDS_STOP_RUNNING_CONTAINERS', 'true') === 'true';
+const removeStoppedContainers = helpers.getEnvVar('MDS_REMOVE_STOPPED_CONTAINERS', 'true') === 'true';
 
+// https://docs.docker.com/engine/api/v1.41/#operation/ContainerCreate
 const self = {
   monitorHandle: undefined,
 
@@ -98,7 +101,7 @@ const self = {
         }
       */
       // Remove dead orphaned containers
-      if (!(
+      if (removeStoppedContainers && !(
         insp.State.Running
         || insp.State.Paused
         || insp.State.Restarting
@@ -114,7 +117,7 @@ const self = {
       }
 
       // Remove orphaned or runtime exceeded containers
-      if (insp.State.Running) {
+      if (stopRunningContainers && insp.State.Running) {
         const meta = self.containerMetadata[info.Id];
         const lastCall = _.get(meta, ['lastCall'], luxon.DateTime.fromISO(insp.State.StartedAt));
         const diff = lastCall.diffNow('seconds');

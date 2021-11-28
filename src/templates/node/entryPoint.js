@@ -15,8 +15,6 @@ const generateTemplate = ({
   return `const grpc = require('@grpc/grpc-js');
 const protoLoader = require('@grpc/proto-loader');
 
-const userModule = require('./${parts[0]}');
-
 const PROTO_PATH = ${protoLine};
 const USER_CONTEXT = ${userContext}
 const packageDefinition = protoLoader.loadSync(
@@ -79,6 +77,9 @@ const configureMdsSdk = (accountId, userId, token) => new Promise((resolve, reje
 const processHandler = (call, callback) => {
   configureMdsSdk(call.request.accountId, call.request.userId, call.request.token)
     .then(() => {
+      // Bring in the user module here in case there's an issue in it's require chain
+      const userModule = require('./${parts[0]}');
+
       const userPayload = readyArgForUsage(call.request.userPayload);
       const userContext = readyArgForUsage(USER_CONTEXT);
       const result = userModule.${parts[1]}(userPayload, userContext);

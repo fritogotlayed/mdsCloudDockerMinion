@@ -1,4 +1,4 @@
-const generateTemplate = (entryPointFileName = 'func.js') => `FROM node:10-alpine
+const generateTemplate = (entryPointFileName = 'func.js') => `FROM node:16-alpine
 EXPOSE 50051
 WORKDIR /usr/src/app
 COPY . .
@@ -8,5 +8,5 @@ RUN rm -rf ./node_modules && \
 ENTRYPOINT ["node", "${entryPointFileName}"]`;
 
 module.exports = {
-  generateTemplate,
+generateTemplate,
 };
