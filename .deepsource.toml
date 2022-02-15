@@ -1,4 +1,7 @@
 version = 1
+test_patterns = [
+    "*.test.js"
+]
 
 [[analyzers]]
 name = "test-coverage"

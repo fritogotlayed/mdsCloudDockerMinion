@@ -20,7 +20,7 @@ describe('src/runtimeTools/index', () => {
         it(`Runtime ${language} expected to ${
           exists ? 'exist' : 'not exist'
         }`, () => {
-          let tools;
+          let tools = null;
           try {
             tools = index.getRuntimeTools(language);
           } catch (err) {
@@ -31,7 +31,7 @@ describe('src/runtimeTools/index', () => {
               throw err;
             }
           }
-          chai.expect(!!tools).to.equal(exists);
+          chai.expect(Boolean(tools)).to.equal(exists);
         });
       },
     );

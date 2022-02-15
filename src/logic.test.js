@@ -436,7 +436,7 @@ describe(__filename, () => {
       sinon
         .stub(helpers, 'getEnvVar')
         .withArgs('MDS_FN_CONTAINER_HOST')
-        .returns(undefined);
+        .returns(null);
 
       // Act
       const result = await logic.getContainerHost();
@@ -481,7 +481,7 @@ describe(__filename, () => {
       getEnvVarStub.withArgs('MDS_FN_CONTAINER_HOST').returns('someHost:5678');
       sinon
         .stub(dns, 'lookup')
-        .callsFake((hn, cb) => cb(undefined, { address: '1.2.3.4' }));
+        .callsFake((hn, cb) => cb(null, { address: '1.2.3.4' }));
 
       // Act
       return logic.getContainerHost().then((result1) => {

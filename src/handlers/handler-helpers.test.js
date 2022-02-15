@@ -64,7 +64,8 @@ describe(__filename, () => {
         chai.expect(resp.status.callCount).to.equal(1);
         chai.expect(resp.status.getCalls()[0].args).to.deep.equal([200]);
         chai.expect(resp.send.callCount).to.equal(1);
-        chai.expect(resp.send.getCalls()[0].args).to.deep.equal([undefined]);
+        chai.expect(resp.send.getCalls()[0].args.length).to.deep.equal(1);
+        chai.expect(resp.send.getCalls()[0].args[0]).to.be.undefined;
       });
     });
 

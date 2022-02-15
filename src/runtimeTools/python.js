@@ -12,7 +12,7 @@ const findEntrypoint = (dir) =>
   new Promise((resolve, reject) => {
     fs.readdir(dir, (err, files) => {
       if (files.length === 0) {
-        return reject();
+        return reject(new Error('No files found in directory.'));
       }
 
       if (files.indexOf('requirements.txt') > -1) {
@@ -27,7 +27,7 @@ const findEntrypoint = (dir) =>
     });
   });
 
-const prepSourceForContainerBuild = async (localPath, entryPoint) =>
+const prepSourceForContainerBuild = (localPath, entryPoint) =>
   new Promise((res, rej) => {
     const logger = globals.getLogger();
     const fdkInstallCmd =
@@ -90,7 +90,7 @@ const prepSourceForContainerBuild = async (localPath, entryPoint) =>
             },
             'Installing FDK failed.',
           );
-          rej();
+          rej(new Error('Failed when preparing source for container build.'));
         }
       },
     );

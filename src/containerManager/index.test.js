@@ -80,7 +80,7 @@ describe(__filename, () => {
       // Act & Assert
       chai.expect(containerManager.monitorHandle).to.be.equal(undefined);
       containerManager.startMonitor();
-      chai.expect(containerManager.monitorHandle).to.not.be.equal(undefined);
+      chai.expect(containerManager.monitorHandle).to.not.be.undefined;
       clock.tick(15 * 1000);
       chai
         .expect(containerManager.handleOrphanedContainers.callCount)

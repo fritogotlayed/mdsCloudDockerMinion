@@ -227,13 +227,11 @@ const self = {
       }
 
       const customNetwork = helpers.getEnvVar('MDS_FN_CONTAINER_NETWORK', '');
-      const ip = await container
-        .inspect()
-        .then((info) =>
-          customNetwork === ''
-            ? info.NetworkSettings.IPAddress
-            : info.NetworkSettings.Networks[customNetwork].IPAddress,
-        );
+      const ip = await container.inspect().then((info) => {
+        return customNetwork === ''
+          ? info.NetworkSettings.IPAddress
+          : info.NetworkSettings.Networks[customNetwork].IPAddress;
+      });
       logger.trace(
         {
           fullImageName,

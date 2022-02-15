@@ -55,7 +55,9 @@ const postMessage = function postMessage(settings, message) {
     req.end();
   }).then((resp) => {
     const resolve = resp.statusCode < 400;
-    return resolve ? Promise.resolve() : Promise.reject();
+    return resolve
+      ? Promise.resolve()
+      : Promise.reject(new Error('Failed to write log message'));
   });
 };
 
