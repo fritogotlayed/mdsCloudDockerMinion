@@ -77,7 +77,7 @@ describe(__filename, () => {
       // Act & Assert
       chai.expect(containerManager.monitorHandle).to.be.equal(undefined);
       containerManager.startMonitor();
-      chai.expect(containerManager.monitorHandle.id).to.be.equal(1);
+      chai.expect(containerManager.monitorHandle).to.not.be.equal(undefined);
       clock.tick(15 * 1000);
       chai.expect(containerManager.handleOrphanedContainers.callCount).to.be.equal(1);
     });

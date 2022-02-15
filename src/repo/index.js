@@ -1,5 +1,5 @@
 const _ = require('lodash');
-const MongoClient = require('mongodb');
+const { MongoClient } = require('mongodb');
 
 const self = {
   getMongoUrl: (env) => _.get(env, ['MDS_FN_MONGO_URL'], 'mongodb://127.0.0.1:27017'),
