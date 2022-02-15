@@ -10,22 +10,30 @@ describe('src/runtimeTools/index', () => {
   });
 
   describe('getRuntimeTools', () => {
-    _.forEach([
-      ['node', true],
-      ['python', true],
-      ['unknown', false],
-    ], ([language, exists]) => {
-      it(`Runtime ${language} expected to ${exists ? 'exist' : 'not exist'}`, () => {
-        let tools;
-        try {
-          tools = index.getRuntimeTools(language);
-        } catch (err) {
-          if (!err || err.message !== `Runtime "${language}" not understood.`) {
-            throw err;
+    _.forEach(
+      [
+        ['node', true],
+        ['python', true],
+        ['unknown', false],
+      ],
+      ([language, exists]) => {
+        it(`Runtime ${language} expected to ${
+          exists ? 'exist' : 'not exist'
+        }`, () => {
+          let tools = null;
+          try {
+            tools = index.getRuntimeTools(language);
+          } catch (err) {
+            if (
+              !err ||
+              err.message !== `Runtime "${language}" not understood.`
+            ) {
+              throw err;
+            }
           }
-        }
-        chai.expect(!!tools).to.equal(exists);
-      });
-    });
+          chai.expect(Boolean(tools)).to.equal(exists);
+        });
+      },
+    );
   });
 });

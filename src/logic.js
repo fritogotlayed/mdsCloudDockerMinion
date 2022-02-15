@@ -29,31 +29,35 @@ const self = {
    * @param {String} localZipPath The full path to the zip file needing expansion.
    * @returns {String} The location of the expanded zip file contents.
    */
-  extractSourceToPath: (localZipPath) => new Promise((resolve, reject) => {
-    const logger = globals.getLogger();
-    return self.createTempDirectory().then((extractedSourceDir) => {
-      try {
-        fs.createReadStream(localZipPath)
-          .pipe(unzipper.Extract({ path: extractedSourceDir }))
-          .on('error', (err) => {
-            logger.warn({ err }, 'Error extracting zip.');
-            reject(err);
-          })
-          .on('close', () => {
-            logger.trace('Extract complete. Removing zip file.');
-            fs.unlink(localZipPath, () => {
-              logger.trace('Deleting zip file. Finding entry point.');
-              resolve(extractedSourceDir);
+  extractSourceToPath: (localZipPath) =>
+    new Promise((resolve, reject) => {
+      const logger = globals.getLogger();
+      self.createTempDirectory().then((extractedSourceDir) => {
+        try {
+          fs.createReadStream(localZipPath)
+            .pipe(unzipper.Extract({ path: extractedSourceDir }))
+            .on('error', (err) => {
+              logger.warn({ err }, 'Error extracting zip.');
+              reject(err);
+            })
+            .on('close', () => {
+              logger.trace('Extract complete. Removing zip file.');
+              fs.unlink(localZipPath, () => {
+                logger.trace('Deleting zip file. Finding entry point.');
+                resolve(extractedSourceDir);
+              });
             });
-          });
-      } catch (err) {
-        reject(err);
-      }
-    });
-  }),
+        } catch (err) {
+          reject(err);
+        }
+      });
+    }),
 
   // https://www.regextester.com/22
-  isValidIpAddress: (ipAddress) => /^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$/.test(ipAddress),
+  isValidIpAddress: (ipAddress) =>
+    /^(?<trash1>(?<trash2>[0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}(?<trash3>[0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$/.test(
+      ipAddress,
+    ),
 
   resolvedContainerHost: undefined,
 
@@ -66,9 +70,10 @@ const self = {
 
     const containerHostEnv = helpers.getEnvVar('MDS_FN_CONTAINER_HOST');
     if (containerHostEnv) {
-      const [host, port] = containerHostEnv.indexOf(':') > -1
-        ? containerHostEnv.split(':')
-        : [containerHostEnv, '80'];
+      const [host, port] =
+        containerHostEnv.indexOf(':') > -1
+          ? containerHostEnv.split(':')
+          : [containerHostEnv, '80'];
 
       try {
         if (self.isValidIpAddress(host)) {
@@ -81,7 +86,10 @@ const self = {
         return self.resolvedContainerHost;
       } catch (err) {
         const logger = globals.getLogger();
-        logger.warn({ err }, 'Failed to find DNS resolution of container host.');
+        logger.warn(
+          { err },
+          'Failed to find DNS resolution of container host.',
+        );
         self.resolvedContainerHost = `${containerHostEnv}/`;
         return self.resolvedContainerHost;
       }
@@ -90,40 +98,46 @@ const self = {
   },
 
   // TODO: rewrite to async/await
-  buildImage: (localPath, funcMetadata) => new Promise((resolve, reject) => {
-    self.getContainerHost().then((containerHost) => {
-      const docker = globals.getDockerInterface();
-      const fullTagName = `${containerHost}mds-sf-${funcMetadata.accountId}/${funcMetadata.name}`.toLowerCase();
-      const tagVersion = funcMetadata.nextVersion || funcMetadata.version;
-      const tarStream = tar.pack(localPath);
-      docker.buildImage(
-        tarStream,
-        {
-          t: `${fullTagName}:${tagVersion}`,
-          dockerfile: 'MdsDockerfile',
-        },
-      ).then((stream) => new Promise((streamResolve, streamReject) => {
-        docker.modem.followProgress(stream, (err, res) => {
-          if (err) {
-            streamReject(err);
-          } else {
-            streamResolve(res);
-          }
-        });
-      })).then(() => {
-        resolve({
-          containerHost,
-          fullTagName,
-          tagVersion,
-          functionName: funcMetadata.name,
-        });
-      }).catch((err) => {
-        const logger = globals.getLogger();
-        logger.error({ err }, 'Failed to build docker image');
-        reject(new Error('Failed to build docker image.'));
+  buildImage: (localPath, funcMetadata) =>
+    new Promise((resolve, reject) => {
+      self.getContainerHost().then((containerHost) => {
+        const docker = globals.getDockerInterface();
+        const fullTagName =
+          `${containerHost}mds-sf-${funcMetadata.accountId}/${funcMetadata.name}`.toLowerCase();
+        const tagVersion = funcMetadata.nextVersion || funcMetadata.version;
+        const tarStream = tar.pack(localPath);
+        docker
+          .buildImage(tarStream, {
+            t: `${fullTagName}:${tagVersion}`,
+            dockerfile: 'MdsDockerfile',
+          })
+          .then(
+            (stream) =>
+              new Promise((streamResolve, streamReject) => {
+                docker.modem.followProgress(stream, (err, res) => {
+                  if (err) {
+                    streamReject(err);
+                  } else {
+                    streamResolve(res);
+                  }
+                });
+              }),
+          )
+          .then(() => {
+            resolve({
+              containerHost,
+              fullTagName,
+              tagVersion,
+              functionName: funcMetadata.name,
+            });
+          })
+          .catch((err) => {
+            const logger = globals.getLogger();
+            logger.error({ err }, 'Failed to build docker image');
+            reject(new Error('Failed to build docker image.'));
+          });
       });
-    });
-  }),
+    }),
 
   /**
    *
@@ -139,24 +153,30 @@ const self = {
    * })
    * @returns {Promise<void>}
    */
-  pushImageToRegistry: (metadata) => new Promise((resolve, reject) => {
-    const docker = globals.getDockerInterface();
-    const image = docker.getImage(`${metadata.fullTagName}:${metadata.tagVersion}`);
-    const opts = {
-      registry: metadata.containerHost,
-    };
-    image.push(opts).then((stream) => {
-      docker.modem.followProgress(stream, (err, res) => {
-        if (err) {
+  pushImageToRegistry: (metadata) =>
+    new Promise((resolve, reject) => {
+      const docker = globals.getDockerInterface();
+      const image = docker.getImage(
+        `${metadata.fullTagName}:${metadata.tagVersion}`,
+      );
+      const opts = {
+        registry: metadata.containerHost,
+      };
+      image
+        .push(opts)
+        .then((stream) => {
+          docker.modem.followProgress(stream, (err, res) => {
+            if (err) {
+              reject(err);
+            } else {
+              resolve(res);
+            }
+          });
+        })
+        .catch((err) => {
           reject(err);
-        } else {
-          resolve(res);
-        }
-      });
-    }).catch((err) => {
-      reject(err);
-    });
-  }),
+        });
+    }),
 
   /**
    *
@@ -172,7 +192,9 @@ const self = {
    */
   removeImageLocally: async (metadata) => {
     const docker = globals.getDockerInterface();
-    const image = docker.getImage(`${metadata.fullTagName}:${metadata.tagVersion}`);
+    const image = docker.getImage(
+      `${metadata.fullTagName}:${metadata.tagVersion}`,
+    );
     const opts = {
       // registry: metadata.containerHost,
     };
@@ -236,9 +258,11 @@ const self = {
     const logger = globals.getLogger();
     const database = await repo.getDatabase();
     const funcCol = database.getCollection('functions');
-    const metadata = await funcCol.find({
-      deletedOn: { $exists: false },
-    }).toArray();
+    const metadata = await funcCol
+      .find({
+        deletedOn: { $exists: false },
+      })
+      .toArray();
 
     try {
       logger.debug({ metadata }, 'Function metadata fetch for list complete');
@@ -271,13 +295,7 @@ const self = {
     const logger = globals.getLogger();
     const database = await repo.getDatabase();
 
-    const {
-      functionId,
-      localFilePath,
-      runtime,
-      entryPoint,
-      context,
-    } = meta;
+    const { functionId, localFilePath, runtime, entryPoint, context } = meta;
 
     let sourcePath;
     try {
@@ -302,9 +320,16 @@ const self = {
       const sourceRootPath = await tools.findEntrypoint(sourcePath);
       logger.debug({ sourceRootPath }, 'Source extraction complete');
 
-      await tools.prepSourceForContainerBuild(sourceRootPath, entryPoint, context);
+      await tools.prepSourceForContainerBuild(
+        sourceRootPath,
+        entryPoint,
+        context,
+      );
       const containerMeta = await self.buildImage(sourceRootPath, metadata);
-      logger.debug({ sourceRootPath, metadata, containerMeta }, 'Container build complete.');
+      logger.debug(
+        { sourceRootPath, metadata, containerMeta },
+        'Container build complete.',
+      );
 
       await self.pushImageToRegistry(containerMeta);
       // TODO: Determine if we should do this anymore
@@ -327,17 +352,15 @@ const self = {
         },
       };
 
-      await funcCol.updateOne(
-        { id: functionId },
-        updatePayload,
-        options,
-      );
+      await funcCol.updateOne({ id: functionId }, updatePayload, options);
     } catch (err) {
       logger.warn({ err }, 'Function build logic failed.');
       throw err;
     } finally {
       await database.close();
-      if (sourcePath) { await self.cleanupDirectory(sourcePath); }
+      if (sourcePath) {
+        await self.cleanupDirectory(sourcePath);
+      }
       logger.debug('Function build complete.');
     }
   },
@@ -356,17 +379,24 @@ const self = {
     }
 
     try {
-      logger.debug({ metadata }, 'Function metadata fetch for execution complete');
+      logger.debug(
+        { metadata },
+        'Function metadata fetch for execution complete',
+      );
 
       // START CONTAINER
-      const containerData = await containerManager.readyFunctionContainerForImage(
-        metadata.fullTagName,
-        metadata.tagVersion,
-      );
+      const containerData =
+        await containerManager.readyFunctionContainerForImage(
+          metadata.fullTagName,
+          metadata.tagVersion,
+        );
       try {
         // CALL AND GET RESPONSE
         // TODO: Implement runtime limits
-        logger.debug({ accountId: metadata.accountId }, 'Attempting to get impersonation token for account.');
+        logger.debug(
+          { accountId: metadata.accountId },
+          'Attempting to get impersonation token for account.',
+        );
         const identityClient = await mdsSdk.getIdentityServiceClient();
         const impersonateResponse = await identityClient.impersonateUser({
           accountId: metadata.accountId,
@@ -391,10 +421,16 @@ const self = {
           userToken: impersonateResponse.token,
         });
         const endTs = luxon.DateTime.utc();
-        logger.debug({ startTs, endTs, diffMs: endTs - startTs }, 'Function execution finished.');
+        logger.debug(
+          { startTs, endTs, diffMs: endTs - startTs },
+          'Function execution finished.',
+        );
         return invokeResult;
       } catch (err) {
-        logger.warn({ err }, 'Error raised from container when invoking function');
+        logger.warn(
+          { err },
+          'Error raised from container when invoking function',
+        );
         const retryableErrors = [
           'Could not connect to provided IP',
           'Call cancelled',
@@ -427,7 +463,10 @@ const self = {
     }
 
     try {
-      logger.debug({ metadata }, 'Function metadata fetch for removal complete');
+      logger.debug(
+        { metadata },
+        'Function metadata fetch for removal complete',
+      );
 
       const updatePayload = {
         $set: {
@@ -442,11 +481,7 @@ const self = {
         },
       };
 
-      await funcCol.updateOne(
-        { id: functionId },
-        updatePayload,
-        options,
-      );
+      await funcCol.updateOne({ id: functionId }, updatePayload, options);
     } catch (err) {
       logger.warn({ err }, 'Error when removing function.');
       throw err;

@@ -8,8 +8,8 @@ const entryPointTemplate = require('../templates/node/entryPoint');
 const dockerfileTemplate = require('../templates/node/dockerfile');
 const protoSetupTemplate = require('../templates/node/protoSetup');
 
-const findEntrypoint = (dir) => common.readdir(dir)
-  .then((files) => {
+const findEntrypoint = (dir) =>
+  common.readdir(dir).then((files) => {
     if (files.length === 0) {
       throw new Error('Empty directory detected');
     }
@@ -22,7 +22,11 @@ const findEntrypoint = (dir) => common.readdir(dir)
     return `${dir}${path.sep}${files[0]}`;
   });
 
-const prepSourceForContainerBuild = async (localPath, entryPoint, userContext) => {
+const prepSourceForContainerBuild = async (
+  localPath,
+  entryPoint,
+  userContext,
+) => {
   const logger = globals.getLogger();
 
   try {
@@ -30,16 +34,16 @@ const prepSourceForContainerBuild = async (localPath, entryPoint, userContext) =
     const packageJsonPath = `${localPath}${path.sep}package.json`;
     const data = await common.readFile(packageJsonPath);
     const packageJson = JSON.parse(data.toString());
-    const newPackageJson = _.merge(
-      packageJson,
-      {
-        dependencies: {
-          '@grpc/grpc-js': '^1.2.6',
-          '@grpc/proto-loader': '^0.5.6',
-        },
+    const newPackageJson = _.merge(packageJson, {
+      dependencies: {
+        '@grpc/grpc-js': '^1.2.6',
+        '@grpc/proto-loader': '^0.5.6',
       },
+    });
+    await common.writeFile(
+      packageJsonPath,
+      JSON.stringify(newPackageJson, null, 2),
     );
-    await common.writeFile(packageJsonPath, JSON.stringify(newPackageJson, null, 2));
 
     // Generate entry file
     const entryFilePath = `${localPath}${path.sep}mdsEntry.js`;
@@ -52,7 +56,10 @@ const prepSourceForContainerBuild = async (localPath, entryPoint, userContext) =
 
     // Generate Dockerfile
     const dockerFilePath = `${localPath}${path.sep}MdsDockerfile`;
-    await common.writeFile(dockerFilePath, dockerfileTemplate.generateTemplate('mdsEntry.js'));
+    await common.writeFile(
+      dockerFilePath,
+      dockerfileTemplate.generateTemplate('mdsEntry.js'),
+    );
 
     // Generate protobuf required files
     const files = await protoSetupTemplate.generateProtobufFiles();

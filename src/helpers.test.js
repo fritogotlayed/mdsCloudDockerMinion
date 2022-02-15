@@ -16,7 +16,9 @@ describe('src/helpers', () => {
   describe('getEnvVar', () => {
     it('Reads env vars', () => {
       const keys = ['NODE_ENV', 'NONEXISTENT'];
-      _.map(keys, (k) => chai.expect(helpers.getEnvVar(k)).to.equal(process.env[k]));
+      _.map(keys, (k) =>
+        chai.expect(helpers.getEnvVar(k)).to.equal(process.env[k]),
+      );
     });
   });
 
@@ -33,7 +35,10 @@ describe('src/helpers', () => {
       });
 
       // Act
-      const result = await helpers.shellExecute(expectedCommand, expectedOptions);
+      const result = await helpers.shellExecute(
+        expectedCommand,
+        expectedOptions,
+      );
 
       // Assert
       chai.expect(result).to.deep.equal({
@@ -65,7 +70,9 @@ describe('src/helpers', () => {
       // Arrange
       const expectedPath = '/fake/path';
       const mockFile = {
-        mv: sinon.stub().callsFake((newPath, cb) => cb(new Error('test failure'))),
+        mv: sinon
+          .stub()
+          .callsFake((newPath, cb) => cb(new Error('test failure'))),
       };
 
       // Act & Assert
@@ -89,10 +96,9 @@ describe('src/helpers', () => {
 
       // Assert
       chai.expect(delStub.callCount).to.be.equal(1);
-      chai.expect(delStub.getCall(0).args).to.deep.equal([
-        './testThing',
-        options,
-      ]);
+      chai
+        .expect(delStub.getCall(0).args)
+        .to.deep.equal(['./testThing', options]);
     });
   });
 
@@ -108,11 +114,9 @@ describe('src/helpers', () => {
 
       // Assert
       chai.expect(mockRequest.download.callCount).to.be.equal(1);
-      chai.expect(mockRequest.download.getCall(0).args).to.deep.equal([
-        'filePath',
-        'fileName',
-        'cb',
-      ]);
+      chai
+        .expect(mockRequest.download.getCall(0).args)
+        .to.deep.equal(['filePath', 'fileName', 'cb']);
     });
   });
 });
