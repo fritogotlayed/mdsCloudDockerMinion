@@ -27,25 +27,30 @@ describe(__filename, () => {
       chai.expect(result).to.not.be.undefined;
       chai.expect(result.Interchange).to.not.be.undefined;
       chai.expect(loadSpy.callCount).to.be.equal(1);
-      chai.expect(loadSpy.getCall(0).args[0]).to.equal(`${__dirname}/protos/containerIO.proto`);
+      chai
+        .expect(loadSpy.getCall(0).args[0])
+        .to.equal(`${__dirname}/protos/containerIO.proto`);
     });
   });
 
   describe('convertPayloadToString', () => {
-    _.each([
-      ['test data', 'test data'],
-      [123, '123'],
-      [true, 'true'],
-      [{ a: '1', b: 2 }, '{"a":"1","b":2}'],
-    ], ([input, expected]) => {
-      it(`Converts ${typeof input} appropriately`, () => {
-        // Act
-        const result = client.convertPayloadToString(input);
+    _.each(
+      [
+        ['test data', 'test data'],
+        [123, '123'],
+        [true, 'true'],
+        [{ a: '1', b: 2 }, '{"a":"1","b":2}'],
+      ],
+      ([input, expected]) => {
+        it(`Converts ${typeof input} appropriately`, () => {
+          // Act
+          const result = client.convertPayloadToString(input);
 
-        // Assert
-        chai.expect(result).to.be.equal(expected);
-      });
-    });
+          // Assert
+          chai.expect(result).to.be.equal(expected);
+        });
+      },
+    );
   });
 
   describe('convertUserResponseToObject', () => {
@@ -76,7 +81,9 @@ describe(__filename, () => {
       };
 
       // Act
-      const result = client.convertUserResponseToObject(JSON.stringify(expected));
+      const result = client.convertUserResponseToObject(
+        JSON.stringify(expected),
+      );
 
       // Assert
       chai.expect(result).to.deep.equal(expected);
@@ -161,7 +168,9 @@ describe(__filename, () => {
         throw new Error('Test passed when it should have failed.');
       } catch (err) {
         // Assert
-        chai.expect(err.message).to.be.equal('Could not connect to provided IP');
+        chai
+          .expect(err.message)
+          .to.be.equal('Could not connect to provided IP');
       }
     });
 

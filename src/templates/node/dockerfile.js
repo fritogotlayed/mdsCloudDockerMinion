@@ -1,4 +1,6 @@
-const generateTemplate = (entryPointFileName = 'func.js') => `FROM node:10-alpine
+const generateTemplate = (
+  entryPointFileName = 'func.js',
+) => `FROM node:10-alpine
 EXPOSE 50051
 WORKDIR /usr/src/app
 COPY . .

@@ -2,9 +2,11 @@ const _ = require('lodash');
 const { MongoClient } = require('mongodb');
 
 const self = {
-  getMongoUrl: (env) => _.get(env, ['MDS_FN_MONGO_URL'], 'mongodb://127.0.0.1:27017'),
+  getMongoUrl: (env) =>
+    _.get(env, ['MDS_FN_MONGO_URL'], 'mongodb://127.0.0.1:27017'),
 
-  getMongoDbName: (env) => _.get(env, ['MDS_FN_MONGO_DB_NAME'], 'mdsCloudDockerMinion'),
+  getMongoDbName: (env) =>
+    _.get(env, ['MDS_FN_MONGO_DB_NAME'], 'mdsCloudDockerMinion'),
 
   getDatabase: (url, options) => {
     const defaultOptions = { useNewUrlParser: true, useUnifiedTopology: true };
@@ -28,7 +30,10 @@ const self = {
     const twentyFourHours = oneHour * 24;
     const sevenDays = twentyFourHours * 7;
 
-    await functionsCol.createIndex({ deletedOn: 1 }, { expireAfterSeconds: sevenDays });
+    await functionsCol.createIndex(
+      { deletedOn: 1 },
+      { expireAfterSeconds: sevenDays },
+    );
   },
 };
 

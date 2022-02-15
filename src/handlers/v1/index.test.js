@@ -17,7 +17,9 @@ describe(__filename, () => {
 
   beforeEach(() => {
     sinon.stub(handlerHelpers, 'getIssuer').returns('testIssuer');
-    sinon.stub(handlerHelpers, 'getAppPublicSignature').resolves('publicSignature');
+    sinon
+      .stub(handlerHelpers, 'getAppPublicSignature')
+      .resolves('publicSignature');
     sinon.stub(jwt, 'verify').returns({
       payload: {
         iss: 'testIssuer',
@@ -148,13 +150,16 @@ describe(__filename, () => {
   describe('listFunctions', () => {
     it('when valid request, responds with 200 and details', () => {
       // Arrange
-      const expected = [{
-        id: 'func1',
-        name: 'Function 1',
-      }, {
-        id: 'func2',
-        name: 'Function 2',
-      }];
+      const expected = [
+        {
+          id: 'func1',
+          name: 'Function 1',
+        },
+        {
+          id: 'func2',
+          name: 'Function 2',
+        },
+      ];
 
       sinon.stub(logic, 'listFunctions').resolves(expected);
 
@@ -239,9 +244,11 @@ describe(__filename, () => {
         .then((resp) => {
           const body = JSON.parse(resp.text);
 
-          chai.expect(body).to.eql([{
-            message: 'sourceArchive missing from payload',
-          }]);
+          chai.expect(body).to.eql([
+            {
+              message: 'sourceArchive missing from payload',
+            },
+          ]);
         });
     });
 
@@ -343,10 +350,9 @@ describe(__filename, () => {
           const body = JSON.parse(resp.text);
 
           chai.expect(logic.executeFunction.callCount).to.be.equal(1);
-          chai.expect(logic.executeFunction.getCall(0).args).to.deep.equal([
-            'abc123',
-            { testBody: 'input' },
-          ]);
+          chai
+            .expect(logic.executeFunction.getCall(0).args)
+            .to.deep.equal(['abc123', { testBody: 'input' }]);
           chai.expect(body).to.eql({
             sample: 'response',
           });
@@ -355,7 +361,9 @@ describe(__filename, () => {
 
     it('when function does not exist, responds with 404', () => {
       // Arrange
-      sinon.stub(logic, 'executeFunction').rejects(new Error('function not found'));
+      sinon
+        .stub(logic, 'executeFunction')
+        .rejects(new Error('function not found'));
 
       // Act / Assert
       return supertest(app)
@@ -368,10 +376,9 @@ describe(__filename, () => {
         .expect(404)
         .then(() => {
           chai.expect(logic.executeFunction.callCount).to.be.equal(1);
-          chai.expect(logic.executeFunction.getCall(0).args).to.deep.equal([
-            'abc123',
-            { testBody: 'input' },
-          ]);
+          chai
+            .expect(logic.executeFunction.getCall(0).args)
+            .to.deep.equal(['abc123', { testBody: 'input' }]);
         });
     });
 
@@ -390,10 +397,9 @@ describe(__filename, () => {
         .expect(500)
         .then(() => {
           chai.expect(logic.executeFunction.callCount).to.be.equal(1);
-          chai.expect(logic.executeFunction.getCall(0).args).to.deep.equal([
-            'abc123',
-            { testBody: 'input' },
-          ]);
+          chai
+            .expect(logic.executeFunction.getCall(0).args)
+            .to.deep.equal(['abc123', { testBody: 'input' }]);
         });
     });
   });
@@ -414,15 +420,17 @@ describe(__filename, () => {
         .expect(200)
         .then(() => {
           chai.expect(logic.removeFunction.callCount).to.be.equal(1);
-          chai.expect(logic.removeFunction.getCall(0).args).to.deep.equal([
-            'abc123',
-          ]);
+          chai
+            .expect(logic.removeFunction.getCall(0).args)
+            .to.deep.equal(['abc123']);
         });
     });
 
     it('when function does not exist, responds with 404', () => {
       // Arrange
-      sinon.stub(logic, 'removeFunction').rejects(new Error('function not found'));
+      sinon
+        .stub(logic, 'removeFunction')
+        .rejects(new Error('function not found'));
 
       // Act / Assert
       return supertest(app)
@@ -435,9 +443,9 @@ describe(__filename, () => {
         .expect(404)
         .then(() => {
           chai.expect(logic.removeFunction.callCount).to.be.equal(1);
-          chai.expect(logic.removeFunction.getCall(0).args).to.deep.equal([
-            'abc123',
-          ]);
+          chai
+            .expect(logic.removeFunction.getCall(0).args)
+            .to.deep.equal(['abc123']);
         });
     });
 
@@ -456,9 +464,9 @@ describe(__filename, () => {
         .expect(500)
         .then(() => {
           chai.expect(logic.removeFunction.callCount).to.be.equal(1);
-          chai.expect(logic.removeFunction.getCall(0).args).to.deep.equal([
-            'abc123',
-          ]);
+          chai
+            .expect(logic.removeFunction.getCall(0).args)
+            .to.deep.equal(['abc123']);
         });
     });
   });

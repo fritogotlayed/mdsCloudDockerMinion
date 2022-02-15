@@ -22,49 +22,52 @@ describe(__filename, () => {
     it('returns filtered list when only image name provided', async () => {
       // Arrange
       const containersStub = {
-        listContainers: sinon.stub().resolves([
-          { Image: 'imageA' },
-          { Image: 'imageB' },
-          { Image: 'C' },
-        ]),
+        listContainers: sinon
+          .stub()
+          .resolves([{ Image: 'imageA' }, { Image: 'imageB' }, { Image: 'C' }]),
       };
       sinon.stub(globals, 'getDockerInterface').returns(containersStub);
 
       // Act
-      const result = await containerManager.findContainersMatchingImage('image');
+      const result = await containerManager.findContainersMatchingImage(
+        'image',
+      );
 
       // Assert
-      chai.expect(result).to.deep.equal([
-        { Image: 'imageA' },
-        { Image: 'imageB' },
+      chai
+        .expect(result)
+        .to.deep.equal([{ Image: 'imageA' }, { Image: 'imageB' }]);
+      chai.expect(containersStub.listContainers.getCall(0).args).to.deep.equal([
+        {
+          all: true,
+        },
       ]);
-      chai.expect(containersStub.listContainers.getCall(0).args).to.deep.equal([{
-        all: true,
-      }]);
     });
 
     it('returns filtered only running list when only image name provided', async () => {
       // Arrange
       const containersStub = {
-        listContainers: sinon.stub().resolves([
-          { Image: 'imageA' },
-          { Image: 'imageB' },
-          { Image: 'C' },
-        ]),
+        listContainers: sinon
+          .stub()
+          .resolves([{ Image: 'imageA' }, { Image: 'imageB' }, { Image: 'C' }]),
       };
       sinon.stub(globals, 'getDockerInterface').returns(containersStub);
 
       // Act
-      const result = await containerManager.findContainersMatchingImage('image', { onlyRunning: true });
+      const result = await containerManager.findContainersMatchingImage(
+        'image',
+        { onlyRunning: true },
+      );
 
       // Assert
-      chai.expect(result).to.deep.equal([
-        { Image: 'imageA' },
-        { Image: 'imageB' },
+      chai
+        .expect(result)
+        .to.deep.equal([{ Image: 'imageA' }, { Image: 'imageB' }]);
+      chai.expect(containersStub.listContainers.getCall(0).args).to.deep.equal([
+        {
+          all: false,
+        },
       ]);
-      chai.expect(containersStub.listContainers.getCall(0).args).to.deep.equal([{
-        all: false,
-      }]);
     });
   });
 
@@ -79,7 +82,9 @@ describe(__filename, () => {
       containerManager.startMonitor();
       chai.expect(containerManager.monitorHandle).to.not.be.equal(undefined);
       clock.tick(15 * 1000);
-      chai.expect(containerManager.handleOrphanedContainers.callCount).to.be.equal(1);
+      chai
+        .expect(containerManager.handleOrphanedContainers.callCount)
+        .to.be.equal(1);
     });
 
     it('when monitor running does nothing', () => {
@@ -94,7 +99,9 @@ describe(__filename, () => {
         containerManager.startMonitor();
         chai.expect(containerManager.monitorHandle.id).to.be.equal(1234);
         clock.tick(15 * 1000);
-        chai.expect(containerManager.handleOrphanedContainers.callCount).to.be.equal(0);
+        chai
+          .expect(containerManager.handleOrphanedContainers.callCount)
+          .to.be.equal(0);
       } finally {
         containerManager.monitorHandle = undefined;
       }
@@ -232,9 +239,9 @@ describe(__filename, () => {
         getContainer: sinon.stub().withArgs(['testId']).returns(containerStub),
       };
       sinon.stub(globals, 'getDockerInterface').returns(dockerStub);
-      sinon.stub(containerManager, 'findContainersMatchingImage').resolves([
-        { Id: 'testid' },
-      ]);
+      sinon
+        .stub(containerManager, 'findContainersMatchingImage')
+        .resolves([{ Id: 'testid' }]);
 
       // Act
       await containerManager.handleOrphanedContainers();
@@ -262,9 +269,9 @@ describe(__filename, () => {
         getContainer: sinon.stub().withArgs(['testId']).returns(containerStub),
       };
       sinon.stub(globals, 'getDockerInterface').returns(dockerStub);
-      sinon.stub(containerManager, 'findContainersMatchingImage').resolves([
-        { Id: 'testid' },
-      ]);
+      sinon
+        .stub(containerManager, 'findContainersMatchingImage')
+        .resolves([{ Id: 'testid' }]);
 
       // Act
       await containerManager.handleOrphanedContainers();
@@ -291,9 +298,9 @@ describe(__filename, () => {
         getContainer: sinon.stub().withArgs(['testId']).returns(containerStub),
       };
       sinon.stub(globals, 'getDockerInterface').returns(dockerStub);
-      sinon.stub(containerManager, 'findContainersMatchingImage').resolves([
-        { Id: 'testid' },
-      ]);
+      sinon
+        .stub(containerManager, 'findContainersMatchingImage')
+        .resolves([{ Id: 'testid' }]);
       sinon.stub(containerManager, 'safeStopContainer');
 
       // Act
@@ -321,9 +328,9 @@ describe(__filename, () => {
         getContainer: sinon.stub().withArgs(['testId']).returns(containerStub),
       };
       sinon.stub(globals, 'getDockerInterface').returns(dockerStub);
-      sinon.stub(containerManager, 'findContainersMatchingImage').resolves([
-        { Id: 'testid' },
-      ]);
+      sinon
+        .stub(containerManager, 'findContainersMatchingImage')
+        .resolves([{ Id: 'testid' }]);
       sinon.stub(containerManager, 'safeStopContainer');
 
       // Act
@@ -341,7 +348,10 @@ describe(__filename, () => {
       sinon.stub(containerManager, 'findContainersMatchingImage').resolves([]);
 
       // Act
-      const result = await containerManager.electExistingContainerToReadyForImage('test:image');
+      const result =
+        await containerManager.electExistingContainerToReadyForImage(
+          'test:image',
+        );
 
       // Assert
       chai.expect(result).to.deep.equal(undefined);
@@ -353,16 +363,21 @@ describe(__filename, () => {
       sinon.stub(globals, 'getLogger').returns({
         trace: sinon.stub(),
       });
-      sinon.stub(containerManager, 'findContainersMatchingImage').resolves([{
-        Id: 'testId',
-        State: 'Running',
-      }]);
+      sinon.stub(containerManager, 'findContainersMatchingImage').resolves([
+        {
+          Id: 'testId',
+          State: 'Running',
+        },
+      ]);
       sinon.stub(globals, 'getDockerInterface').returns({
         getContainer: sinon.stub().withArgs('testId').returns(mockContainer),
       });
 
       // Act
-      const result = await containerManager.electExistingContainerToReadyForImage('test:image');
+      const result =
+        await containerManager.electExistingContainerToReadyForImage(
+          'test:image',
+        );
 
       // Assert
       chai.expect(result).to.equal(mockContainer);
@@ -374,19 +389,25 @@ describe(__filename, () => {
       sinon.stub(globals, 'getLogger').returns({
         trace: sinon.stub(),
       });
-      sinon.stub(containerManager, 'findContainersMatchingImage').resolves([{
-        Id: 'testId',
-        State: 'Running',
-      }, {
-        Id: 'stoppedId',
-        State: 'Exited',
-      }]);
+      sinon.stub(containerManager, 'findContainersMatchingImage').resolves([
+        {
+          Id: 'testId',
+          State: 'Running',
+        },
+        {
+          Id: 'stoppedId',
+          State: 'Exited',
+        },
+      ]);
       sinon.stub(globals, 'getDockerInterface').returns({
         getContainer: sinon.stub().withArgs('testId').returns(mockContainer),
       });
 
       // Act
-      const result = await containerManager.electExistingContainerToReadyForImage('test:image');
+      const result =
+        await containerManager.electExistingContainerToReadyForImage(
+          'test:image',
+        );
 
       // Assert
       chai.expect(result).to.equal(mockContainer);
@@ -405,17 +426,22 @@ describe(__filename, () => {
       sinon.stub(globals, 'getLogger').returns({
         trace: sinon.stub(),
       });
-      sinon.stub(containerManager, 'findContainersMatchingImage').resolves([{
-        Id: 'testId',
-        State: 'Exited',
-      }]);
+      sinon.stub(containerManager, 'findContainersMatchingImage').resolves([
+        {
+          Id: 'testId',
+          State: 'Exited',
+        },
+      ]);
       sinon.stub(containerManager, 'safeStartContainer').resolves();
       sinon.stub(globals, 'getDockerInterface').returns({
         getContainer: sinon.stub().withArgs('testId').returns(mockContainer),
       });
 
       // Act
-      const result = await containerManager.electExistingContainerToReadyForImage('test:image');
+      const result =
+        await containerManager.electExistingContainerToReadyForImage(
+          'test:image',
+        );
 
       // Assert
       chai.expect(result).to.equal(mockContainer);
@@ -435,17 +461,22 @@ describe(__filename, () => {
       sinon.stub(globals, 'getLogger').returns({
         trace: sinon.stub(),
       });
-      sinon.stub(containerManager, 'findContainersMatchingImage').resolves([{
-        Id: 'testId',
-        State: 'Exited',
-      }]);
+      sinon.stub(containerManager, 'findContainersMatchingImage').resolves([
+        {
+          Id: 'testId',
+          State: 'Exited',
+        },
+      ]);
       sinon.stub(containerManager, 'safeStartContainer').resolves();
       sinon.stub(globals, 'getDockerInterface').returns({
         getContainer: sinon.stub().withArgs('testId').returns(mockContainer),
       });
 
       // Act
-      const result = await containerManager.electExistingContainerToReadyForImage('test:image');
+      const result =
+        await containerManager.electExistingContainerToReadyForImage(
+          'test:image',
+        );
 
       // Assert
       chai.expect(result).to.equal(undefined);
@@ -471,14 +502,19 @@ describe(__filename, () => {
       sinon.stub(globals, 'getLogger').returns({
         trace: sinon.stub(),
       });
-      sinon.stub(containerManager, 'electExistingContainerToReadyForImage').resolves();
+      sinon
+        .stub(containerManager, 'electExistingContainerToReadyForImage')
+        .resolves();
       sinon.stub(containerManager, 'safeStartContainer').resolves();
       sinon.stub(globals, 'getDockerInterface').returns({
         createContainer: sinon.stub().returns(mockContainer),
       });
 
       // Act
-      const result = await containerManager.readyFunctionContainerForImage('test', 'image');
+      const result = await containerManager.readyFunctionContainerForImage(
+        'test',
+        'image',
+      );
 
       // Assert
       chai.expect(result).to.deep.equal({
@@ -505,11 +541,18 @@ describe(__filename, () => {
       sinon.stub(globals, 'getLogger').returns({
         trace: sinon.stub(),
       });
-      sinon.stub(containerManager, 'electExistingContainerToReadyForImage').resolves(mockContainer);
-      sinon.stub(containerManager, 'safeStartContainer').rejects('Test should not start container');
+      sinon
+        .stub(containerManager, 'electExistingContainerToReadyForImage')
+        .resolves(mockContainer);
+      sinon
+        .stub(containerManager, 'safeStartContainer')
+        .rejects('Test should not start container');
 
       // Act
-      const result = await containerManager.readyFunctionContainerForImage('test', 'image');
+      const result = await containerManager.readyFunctionContainerForImage(
+        'test',
+        'image',
+      );
 
       // Assert
       chai.expect(result).to.deep.equal({
@@ -540,12 +583,22 @@ describe(__filename, () => {
       sinon.stub(globals, 'getLogger').returns({
         trace: sinon.stub(),
       });
-      sinon.stub(containerManager, 'electExistingContainerToReadyForImage').resolves(mockContainer);
-      sinon.stub(containerManager, 'safeStartContainer').rejects('Test should not start container');
-      sinon.stub(helpers, 'getEnvVar').withArgs('MDS_FN_CONTAINER_NETWORK', '').returns('CustomNetwork');
+      sinon
+        .stub(containerManager, 'electExistingContainerToReadyForImage')
+        .resolves(mockContainer);
+      sinon
+        .stub(containerManager, 'safeStartContainer')
+        .rejects('Test should not start container');
+      sinon
+        .stub(helpers, 'getEnvVar')
+        .withArgs('MDS_FN_CONTAINER_NETWORK', '')
+        .returns('CustomNetwork');
 
       // Act
-      const result = await containerManager.readyFunctionContainerForImage('test', 'image');
+      const result = await containerManager.readyFunctionContainerForImage(
+        'test',
+        'image',
+      );
 
       // Assert
       chai.expect(result).to.deep.equal({

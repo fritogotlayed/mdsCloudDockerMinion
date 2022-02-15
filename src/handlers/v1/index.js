@@ -18,7 +18,11 @@ const createFunction = async (request, response) => {
 
   const validationResult = createValidator.validate(body);
   if (!validationResult.valid) {
-    return handlerHelpers.sendResponse(response, 400, JSON.stringify(validationResult.errors));
+    return handlerHelpers.sendResponse(
+      response,
+      400,
+      JSON.stringify(validationResult.errors),
+    );
   }
 
   try {
@@ -37,7 +41,9 @@ const createFunction = async (request, response) => {
     };
     return handlerHelpers.sendResponse(response, 201, JSON.stringify(respBody));
   } catch (err) {
-    const referenceNumber = `${globals.generateRandomString(32)}-${luxon.DateTime.utc().toMillis()}`;
+    const referenceNumber = `${globals.generateRandomString(
+      32,
+    )}-${luxon.DateTime.utc().toMillis()}`;
     const msg = {
       status: 'Failed',
       referenceNumber,
@@ -54,7 +60,9 @@ const listFunctions = async (request, response) => {
     return handlerHelpers.sendResponse(response, 200, result);
   } catch (err) {
     logger.error(err, 'Error occurred while attempting to execute function');
-    const referenceNumber = `${globals.generateRandomString(32)}-${luxon.DateTime.utc().toMillis()}`;
+    const referenceNumber = `${globals.generateRandomString(
+      32,
+    )}-${luxon.DateTime.utc().toMillis()}`;
     const msg = {
       status: 'Failed',
       referenceNumber,
@@ -73,13 +81,17 @@ const buildContainerHandler = async (request, response) => {
   }
 
   if (!files || !files.sourceArchive) {
-    const respBody = JSON.stringify([{ message: 'sourceArchive missing from payload' }]);
+    const respBody = JSON.stringify([
+      { message: 'sourceArchive missing from payload' },
+    ]);
     return handlerHelpers.sendResponse(response, 400, respBody);
   }
 
   let localFilePath;
   try {
-    const distinctFile = `${globals.generateRandomString(8)}-${files.sourceArchive.name}`;
+    const distinctFile = `${globals.generateRandomString(8)}-${
+      files.sourceArchive.name
+    }`;
     localFilePath = `${os.tmpdir()}${path.sep}${distinctFile}`;
     await helpers.saveRequestFile(files.sourceArchive, localFilePath);
 
@@ -97,7 +109,9 @@ const buildContainerHandler = async (request, response) => {
     };
     return handlerHelpers.sendResponse(response, 200, JSON.stringify(msg));
   } catch (err) {
-    const referenceNumber = `${globals.generateRandomString(32)}-${luxon.DateTime.utc().toMillis()}`;
+    const referenceNumber = `${globals.generateRandomString(
+      32,
+    )}-${luxon.DateTime.utc().toMillis()}`;
     const msg = {
       status: 'Failed',
       referenceNumber,
@@ -111,9 +125,7 @@ const buildContainerHandler = async (request, response) => {
 
 const executeContainerHandler = async (request, response) => {
   const { body, params } = request;
-  const {
-    functionId,
-  } = params;
+  const { functionId } = params;
   try {
     const result = await logic.executeFunction(functionId, body);
     logger.trace('success response returned');
@@ -146,34 +158,44 @@ const removeFunction = async (request, response) => {
   }
 };
 
-router.post('/createFunction',
+router.post(
+  '/createFunction',
   handlerHelpers.validateToken(logger),
   handlerHelpers.ensureRequestFromSystem({ logger }),
-  createFunction);
+  createFunction,
+);
 
-router.get('/all',
+router.get(
+  '/all',
   handlerHelpers.validateToken(logger),
   handlerHelpers.ensureRequestFromSystem({ logger }),
-  listFunctions);
+  listFunctions,
+);
 
 // Get specific function details ??
 
 // Modify Function Settings ??
 
-router.post('/buildFunction',
+router.post(
+  '/buildFunction',
   handlerHelpers.validateToken(logger),
   handlerHelpers.ensureRequestFromSystem({ logger }),
-  buildContainerHandler);
+  buildContainerHandler,
+);
 
-router.post('/executeFunction/:functionId',
+router.post(
+  '/executeFunction/:functionId',
   handlerHelpers.validateToken(logger),
   handlerHelpers.ensureRequestFromSystem({ logger }),
-  executeContainerHandler);
+  executeContainerHandler,
+);
 
 // Delete Function
-router.delete('/:functionId',
+router.delete(
+  '/:functionId',
   handlerHelpers.validateToken(logger),
   handlerHelpers.ensureRequestFromSystem({ logger }),
-  removeFunction);
+  removeFunction,
+);
 
 module.exports = router;

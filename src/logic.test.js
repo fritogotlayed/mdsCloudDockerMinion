@@ -89,8 +89,9 @@ describe(__filename, () => {
       });
 
       // Act
-      return chai.expect(logic.extractSourceToPath(metadata)).to.eventually.be.fulfilled
-        .then((path) => {
+      return chai
+        .expect(logic.extractSourceToPath(metadata))
+        .to.eventually.be.fulfilled.then((path) => {
           chai.expect(path).to.equal('/tmp/abcdef');
         });
     });
@@ -111,8 +112,9 @@ describe(__filename, () => {
       });
 
       // Act
-      return chai.expect(logic.extractSourceToPath(metadata)).to.eventually.be
-        .rejectedWith('test error');
+      return chai
+        .expect(logic.extractSourceToPath(metadata))
+        .to.eventually.be.rejectedWith('test error');
     });
 
     it('when error thrown rejects with error', () => {
@@ -121,8 +123,9 @@ describe(__filename, () => {
       sinon.stub(fs, 'createReadStream').throws(new Error('test error'));
 
       // Act & Assert
-      return chai.expect(logic.extractSourceToPath(metadata)).to.eventually.be
-        .rejectedWith('test error');
+      return chai
+        .expect(logic.extractSourceToPath(metadata))
+        .to.eventually.be.rejectedWith('test error');
     });
   });
 
@@ -157,7 +160,8 @@ describe(__filename, () => {
       sinon.stub(globals, 'getDockerInterface').returns(dockerStub);
 
       // Act
-      return chai.expect(logic.buildImage(localPath, metadata))
+      return chai
+        .expect(logic.buildImage(localPath, metadata))
         .to.eventually.be.fulfilled.then((data) => {
           chai.expect(data).to.deep.equal({
             containerHost: 'containerHost/',
@@ -185,7 +189,8 @@ describe(__filename, () => {
       sinon.stub(globals, 'getDockerInterface').returns(dockerStub);
 
       // Act
-      return chai.expect(logic.buildImage(localPath, metadata))
+      return chai
+        .expect(logic.buildImage(localPath, metadata))
         .to.eventually.be.rejectedWith('Failed to build docker image.');
     });
   });
@@ -212,8 +217,8 @@ describe(__filename, () => {
       sinon.stub(globals, 'getDockerInterface').returns(dockerStub);
 
       // Act
-      return chai.expect(logic.pushImageToRegistry(metadata))
-        .to.eventually.be.fulfilled;
+      return chai.expect(logic.pushImageToRegistry(metadata)).to.eventually.be
+        .fulfilled;
     });
 
     it('rejects after image push unsuccessful', () => {
@@ -232,8 +237,8 @@ describe(__filename, () => {
       sinon.stub(globals, 'getDockerInterface').returns(dockerStub);
 
       // Act
-      return chai.expect(logic.pushImageToRegistry(metadata))
-        .to.eventually.be.rejected;
+      return chai.expect(logic.pushImageToRegistry(metadata)).to.eventually.be
+        .rejected;
     });
 
     it('rejects after image push raises error', () => {
@@ -247,8 +252,8 @@ describe(__filename, () => {
       sinon.stub(globals, 'getDockerInterface').returns(dockerStub);
 
       // Act
-      return chai.expect(logic.pushImageToRegistry(metadata))
-        .to.eventually.be.rejected;
+      return chai.expect(logic.pushImageToRegistry(metadata)).to.eventually.be
+        .rejected;
     });
   });
 
@@ -269,8 +274,8 @@ describe(__filename, () => {
       sinon.stub(globals, 'getDockerInterface').returns(dockerStub);
 
       // Act
-      return chai.expect(logic.removeImageLocally(metadata))
-        .to.eventually.be.fulfilled;
+      return chai.expect(logic.removeImageLocally(metadata)).to.eventually.be
+        .fulfilled;
     });
 
     it('resolves after command fails and message logged', () => {
@@ -288,7 +293,8 @@ describe(__filename, () => {
       sinon.stub(globals, 'getLogger').returns(fakeLogger);
 
       // Act
-      return chai.expect(logic.removeImageLocally(metadata))
+      return chai
+        .expect(logic.removeImageLocally(metadata))
         .to.eventually.be.fulfilled.then(() => {
           chai.expect(fakeLogger.warn.callCount).to.equal(1);
         });
@@ -304,35 +310,42 @@ describe(__filename, () => {
 
     it('updates data store and provider successfully when function exists', () => {
       // Arrange
-      const dbFuncMetadata = {
-      };
-      const containerMeta = {
-      };
+      const dbFuncMetadata = {};
+      const containerMeta = {};
       const runtimeToolsFake = {
         prepSourceForContainerBuild: sinon.stub().resolves(),
         findEntrypoint: sinon.stub().resolves(),
       };
 
       const funcColStub = {
-        findOne: sinon.stub()
-          .withArgs(sinon.match({ id: eventData.functionId })).resolves(dbFuncMetadata),
+        findOne: sinon
+          .stub()
+          .withArgs(sinon.match({ id: eventData.functionId }))
+          .resolves(dbFuncMetadata),
         updateOne: sinon.stub().resolves(),
       };
       sinon.stub(repo, 'getDatabase').resolves({
         close: () => Promise.resolve(),
         getCollection: () => funcColStub,
       });
-      sinon.stub(logic, 'extractSourceToPath')
-        .withArgs('/tmp/abcdef').resolves('/tmp/sourcePath');
-      sinon.stub(runtimeTools, 'getRuntimeTools')
-        .withArgs('testRuntime').returns(runtimeToolsFake);
+      sinon
+        .stub(logic, 'extractSourceToPath')
+        .withArgs('/tmp/abcdef')
+        .resolves('/tmp/sourcePath');
+      sinon
+        .stub(runtimeTools, 'getRuntimeTools')
+        .withArgs('testRuntime')
+        .returns(runtimeToolsFake);
       sinon.stub(logic, 'buildImage').resolves(containerMeta);
       sinon.stub(logic, 'pushImageToRegistry').resolves();
-      sinon.stub(logic, 'cleanupDirectory')
-        .withArgs('/tmp/sourcePath').resolves();
+      sinon
+        .stub(logic, 'cleanupDirectory')
+        .withArgs('/tmp/sourcePath')
+        .resolves();
 
       // Act
-      return chai.expect(logic.buildFunction(eventData)).to.eventually.be.fulfilled;
+      return chai.expect(logic.buildFunction(eventData)).to.eventually.be
+        .fulfilled;
     });
 
     it('logs and throws when error occurs', () => {
@@ -342,8 +355,10 @@ describe(__filename, () => {
         warn: sinon.stub(),
       };
       const funcColStub = {
-        findOne: sinon.stub()
-          .withArgs(sinon.match({ id: eventData.functionId })).resolves({}),
+        findOne: sinon
+          .stub()
+          .withArgs(sinon.match({ id: eventData.functionId }))
+          .resolves({}),
         updateOne: sinon.stub().resolves(),
       };
       sinon.stub(globals, 'getLogger').returns(fakeLogger);
@@ -351,15 +366,20 @@ describe(__filename, () => {
         close: () => Promise.resolve(),
         getCollection: () => funcColStub,
       });
-      sinon.stub(logic, 'extractSourceToPath')
-        .withArgs('/tmp/abcdef').resolves('/tmp/sourcePath');
-      sinon.stub(runtimeTools, 'getRuntimeTools')
-        .withArgs('testRuntime').throws(new Error('test error'));
-      sinon.stub(logic, 'cleanupDirectory')
-        .withArgs('/tmp/abcdef').resolves();
+      sinon
+        .stub(logic, 'extractSourceToPath')
+        .withArgs('/tmp/abcdef')
+        .resolves('/tmp/sourcePath');
+      sinon
+        .stub(runtimeTools, 'getRuntimeTools')
+        .withArgs('testRuntime')
+        .throws(new Error('test error'));
+      sinon.stub(logic, 'cleanupDirectory').withArgs('/tmp/abcdef').resolves();
 
       // Act
-      return chai.expect(logic.buildFunction(eventData)).to.eventually.be.rejectedWith('test error')
+      return chai
+        .expect(logic.buildFunction(eventData))
+        .to.eventually.be.rejectedWith('test error')
         .then(() => {
           chai.expect(fakeLogger.warn.callCount).to.equal(1);
         });
@@ -372,8 +392,10 @@ describe(__filename, () => {
         warn: sinon.stub(),
       };
       const funcColStub = {
-        findOne: sinon.stub()
-          .withArgs(sinon.match({ id: eventData.functionId })).resolves(),
+        findOne: sinon
+          .stub()
+          .withArgs(sinon.match({ id: eventData.functionId }))
+          .resolves(),
         updateOne: sinon.stub().resolves(),
       };
       sinon.stub(globals, 'getLogger').returns(fakeLogger);
@@ -381,19 +403,24 @@ describe(__filename, () => {
         close: () => Promise.resolve(),
         getCollection: () => funcColStub,
       });
-      sinon.stub(logic, 'extractSourceToPath')
-        .withArgs('/tmp/abcdef').resolves('/tmp/sourcePath');
-      sinon.stub(runtimeTools, 'getRuntimeTools')
-        .withArgs('testRuntime').throws(new Error('test error'));
-      sinon.stub(logic, 'cleanupDirectory')
-        .withArgs('/tmp/abcdef').resolves();
+      sinon
+        .stub(logic, 'extractSourceToPath')
+        .withArgs('/tmp/abcdef')
+        .resolves('/tmp/sourcePath');
+      sinon
+        .stub(runtimeTools, 'getRuntimeTools')
+        .withArgs('testRuntime')
+        .throws(new Error('test error'));
+      sinon.stub(logic, 'cleanupDirectory').withArgs('/tmp/abcdef').resolves();
 
       // Act
       try {
         await logic.buildFunction(eventData);
         throw new Error('test should of thrown an error but did not');
       } catch (err) {
-        chai.expect(err.message).to.be.equal(`Could not find function ${eventData.functionId}.`);
+        chai
+          .expect(err.message)
+          .to.be.equal(`Could not find function ${eventData.functionId}.`);
         chai.expect(fakeLogger.warn.callCount).to.equal(1);
       }
     });
@@ -406,7 +433,10 @@ describe(__filename, () => {
 
     it('resolves empty string when environment variable missing', async () => {
       // Arrange
-      sinon.stub(helpers, 'getEnvVar').withArgs('MDS_FN_CONTAINER_HOST').returns(undefined);
+      sinon
+        .stub(helpers, 'getEnvVar')
+        .withArgs('MDS_FN_CONTAINER_HOST')
+        .returns(undefined);
 
       // Act
       const result = await logic.getContainerHost();
@@ -417,7 +447,10 @@ describe(__filename, () => {
 
     it('resolves with port 80 when no port specified', () => {
       // Arrange
-      sinon.stub(helpers, 'getEnvVar').withArgs('MDS_FN_CONTAINER_HOST').returns('1.2.3.4');
+      sinon
+        .stub(helpers, 'getEnvVar')
+        .withArgs('MDS_FN_CONTAINER_HOST')
+        .returns('1.2.3.4');
 
       // Act
       return logic.getContainerHost().then((result1) => {
@@ -432,19 +465,23 @@ describe(__filename, () => {
       getEnvVarStub.withArgs('MDS_FN_CONTAINER_HOST').returns('1.2.3.4:5678');
 
       // Act
-      return logic.getContainerHost().then((result1) => logic.getContainerHost().then((result2) => {
-        // Assert
-        chai.expect(result1).to.equal('1.2.3.4:5678/');
-        chai.expect(result2).to.equal('1.2.3.4:5678/');
-        chai.expect(getEnvVarStub.callCount).to.equal(1);
-      }));
+      return logic.getContainerHost().then((result1) =>
+        logic.getContainerHost().then((result2) => {
+          // Assert
+          chai.expect(result1).to.equal('1.2.3.4:5678/');
+          chai.expect(result2).to.equal('1.2.3.4:5678/');
+          chai.expect(getEnvVarStub.callCount).to.equal(1);
+        }),
+      );
     });
 
     it('resolves ip address of host name when dns name used in place of IP address', () => {
       // Arrange
       const getEnvVarStub = sinon.stub(helpers, 'getEnvVar');
       getEnvVarStub.withArgs('MDS_FN_CONTAINER_HOST').returns('someHost:5678');
-      sinon.stub(dns, 'lookup').callsFake((hn, cb) => cb(undefined, { address: '1.2.3.4' }));
+      sinon
+        .stub(dns, 'lookup')
+        .callsFake((hn, cb) => cb(undefined, { address: '1.2.3.4' }));
 
       // Act
       return logic.getContainerHost().then((result1) => {
@@ -457,7 +494,9 @@ describe(__filename, () => {
       // Arrange
       const getEnvVarStub = sinon.stub(helpers, 'getEnvVar');
       getEnvVarStub.withArgs('MDS_FN_CONTAINER_HOST').returns('someHost:5678');
-      sinon.stub(dns, 'lookup').callsFake((hn, cb) => cb(new Error('test error')));
+      sinon
+        .stub(dns, 'lookup')
+        .callsFake((hn, cb) => cb(new Error('test error')));
 
       // Act
       const result = await logic.getContainerHost();
@@ -492,36 +531,43 @@ describe(__filename, () => {
       chai.expect(result.exists).to.be.equal(false);
       chai.expect(result.id).to.be.string;
       chai.expect(funcColStub.findOne.callCount).to.be.equal(1);
-      chai.expect(funcColStub.findOne.getCall(0).args).to.deep.equal([{
-        name: 'testFunction',
-        accountId: 'test-123',
-        deletedOn: {
-          $exists: false,
+      chai.expect(funcColStub.findOne.getCall(0).args).to.deep.equal([
+        {
+          name: 'testFunction',
+          accountId: 'test-123',
+          deletedOn: {
+            $exists: false,
+          },
         },
-      }]);
+      ]);
       chai.expect(funcColStub.insertOne.callCount).to.be.equal(1);
-      chai.expect(funcColStub.insertOne.getCall(0).args).to.deep.equal([{
-        name: 'testFunction',
-        accountId: 'test-123',
-        id: result.id,
-        created: now.toISOString(),
-        maxProcesses: 3,
-        nextVersion: 1,
-      }, {
-        writeConcern: {
-          j: true,
-          w: 'majority',
-          wtimeout: 30000,
+      chai.expect(funcColStub.insertOne.getCall(0).args).to.deep.equal([
+        {
+          name: 'testFunction',
+          accountId: 'test-123',
+          id: result.id,
+          created: now.toISOString(),
+          maxProcesses: 3,
+          nextVersion: 1,
         },
-      }]);
+        {
+          writeConcern: {
+            j: true,
+            w: 'majority',
+            wtimeout: 30000,
+          },
+        },
+      ]);
     });
 
     it('When the function exists returns message stating function already exists', async () => {
       // Arrange
       const funcId = 'testFunctionId';
       const funcColStub = {
-        findOne: sinon.stub()
-          .withArgs(sinon.match({ id: funcId })).resolves({}),
+        findOne: sinon
+          .stub()
+          .withArgs(sinon.match({ id: funcId }))
+          .resolves({}),
         insertOne: sinon.stub().resolves(),
       };
       sinon.stub(repo, 'getDatabase').resolves({
@@ -542,13 +588,15 @@ describe(__filename, () => {
       chai.expect(result.exists).to.be.equal(true);
       chai.expect(result.id).to.be.undefined;
       chai.expect(funcColStub.findOne.callCount).to.be.equal(1);
-      chai.expect(funcColStub.findOne.getCall(0).args).to.deep.equal([{
-        name: 'testFunction',
-        accountId: 'test-123',
-        deletedOn: {
-          $exists: false,
+      chai.expect(funcColStub.findOne.getCall(0).args).to.deep.equal([
+        {
+          name: 'testFunction',
+          accountId: 'test-123',
+          deletedOn: {
+            $exists: false,
+          },
         },
-      }]);
+      ]);
       chai.expect(funcColStub.insertOne.callCount).to.be.equal(0);
     });
   });
@@ -558,17 +606,20 @@ describe(__filename, () => {
       // Arrange
       const now = new Date();
       sinon.useFakeTimers(now);
-      const expectedResults = [{
-        accountId: 'acct1',
-        id: '1',
-        created: now.toISOString(),
-        name: 'acct1-1',
-      }, {
-        accountId: 'acct2',
-        id: '2',
-        created: now.toISOString(),
-        name: 'acct2-2',
-      }];
+      const expectedResults = [
+        {
+          accountId: 'acct1',
+          id: '1',
+          created: now.toISOString(),
+          name: 'acct1-1',
+        },
+        {
+          accountId: 'acct2',
+          id: '2',
+          created: now.toISOString(),
+          name: 'acct2-2',
+        },
+      ];
       const funcColStub = {
         find: sinon.stub().returns({
           toArray: () => expectedResults,
@@ -586,11 +637,13 @@ describe(__filename, () => {
       chai.expect(result).to.exist;
       chai.expect(result).to.deep.equal(expectedResults);
       chai.expect(funcColStub.find.callCount).to.be.equal(1);
-      chai.expect(funcColStub.find.getCall(0).args).to.deep.equal([{
-        deletedOn: {
-          $exists: false,
+      chai.expect(funcColStub.find.getCall(0).args).to.deep.equal([
+        {
+          deletedOn: {
+            $exists: false,
+          },
         },
-      }]);
+      ]);
     });
   });
 
@@ -602,7 +655,8 @@ describe(__filename, () => {
       };
       const funcId = 'testFunctionId';
       const funcColStub = {
-        findOne: sinon.stub()
+        findOne: sinon
+          .stub()
           .withArgs(sinon.match({ id: funcId, deletedOn: { $exists: false } }))
           .resolves({
             fullTagName: 'blah/someTag',
@@ -630,26 +684,34 @@ describe(__filename, () => {
       });
 
       // Act
-      const result = await logic.executeFunction(funcId, JSON.stringify({ baz: 1 }));
+      const result = await logic.executeFunction(
+        funcId,
+        JSON.stringify({ baz: 1 }),
+      );
 
       // Assert
       chai.expect(result).to.deep.equal(expectedResult);
-      chai.expect(containerManager.readyFunctionContainerForImage.callCount).to.be.equal(1);
-      chai.expect(containerManager.readyFunctionContainerForImage.getCall(0).args).to.deep.equal([
-        'blah/someTag',
-        '1',
-      ]);
-      chai.expect(containerManager.releaseFunctionContainer.callCount).to.be.equal(1);
-      chai.expect(containerManager.releaseFunctionContainer.getCall(0).args).to.deep.equal([
-        'containerHandle',
-      ]);
+      chai
+        .expect(containerManager.readyFunctionContainerForImage.callCount)
+        .to.be.equal(1);
+      chai
+        .expect(containerManager.readyFunctionContainerForImage.getCall(0).args)
+        .to.deep.equal(['blah/someTag', '1']);
+      chai
+        .expect(containerManager.releaseFunctionContainer.callCount)
+        .to.be.equal(1);
+      chai
+        .expect(containerManager.releaseFunctionContainer.getCall(0).args)
+        .to.deep.equal(['containerHandle']);
       chai.expect(grpcClient.invoke.callCount).to.be.equal(1);
-      chai.expect(grpcClient.invoke.getCall(0).args).to.deep.equal([{
-        hostIp: '127.0.0.1',
-        payload: JSON.stringify({ baz: 1 }),
-        userId: 'impersonatedUser',
-        userToken: 'fakeImpersonationToken',
-      }]);
+      chai.expect(grpcClient.invoke.getCall(0).args).to.deep.equal([
+        {
+          hostIp: '127.0.0.1',
+          payload: JSON.stringify({ baz: 1 }),
+          userId: 'impersonatedUser',
+          userToken: 'fakeImpersonationToken',
+        },
+      ]);
     });
 
     it('When function call errors with retry-able error retries and returns result', async () => {
@@ -659,7 +721,8 @@ describe(__filename, () => {
       };
       const funcId = 'testFunctionId';
       const funcColStub = {
-        findOne: sinon.stub()
+        findOne: sinon
+          .stub()
           .withArgs(sinon.match({ id: funcId, deletedOn: { $exists: false } }))
           .resolves({
             fullTagName: 'blah/someTag',
@@ -680,7 +743,8 @@ describe(__filename, () => {
         handle: 'containerHandle',
       });
       sinon.stub(containerManager, 'releaseFunctionContainer').resolves();
-      sinon.stub(grpcClient, 'invoke')
+      sinon
+        .stub(grpcClient, 'invoke')
         .onFirstCall()
         .rejects(new Error('Could not connect to provided IP'))
         .onSecondCall()
@@ -691,27 +755,37 @@ describe(__filename, () => {
       });
 
       // Act
-      const result = await logic.executeFunction(funcId, JSON.stringify({ baz: 1 }));
+      const result = await logic.executeFunction(
+        funcId,
+        JSON.stringify({ baz: 1 }),
+      );
 
       // Assert
       chai.expect(result).to.deep.equal(expectedResult);
-      chai.expect(containerManager.readyFunctionContainerForImage.callCount).to.be.equal(2);
-      chai.expect(containerManager.releaseFunctionContainer.callCount).to.be.equal(2);
+      chai
+        .expect(containerManager.readyFunctionContainerForImage.callCount)
+        .to.be.equal(2);
+      chai
+        .expect(containerManager.releaseFunctionContainer.callCount)
+        .to.be.equal(2);
       chai.expect(grpcClient.invoke.callCount).to.be.equal(2);
       for (let i = 0; i < 2; i += 1) {
-        chai.expect(containerManager.readyFunctionContainerForImage.getCall(i).args).to.deep.equal([
-          'blah/someTag',
-          '1',
+        chai
+          .expect(
+            containerManager.readyFunctionContainerForImage.getCall(i).args,
+          )
+          .to.deep.equal(['blah/someTag', '1']);
+        chai
+          .expect(containerManager.releaseFunctionContainer.getCall(i).args)
+          .to.deep.equal(['containerHandle']);
+        chai.expect(grpcClient.invoke.getCall(i).args).to.deep.equal([
+          {
+            hostIp: '127.0.0.1',
+            payload: JSON.stringify({ baz: 1 }),
+            userId: 'impersonatedUser',
+            userToken: 'fakeImpersonationToken',
+          },
         ]);
-        chai.expect(containerManager.releaseFunctionContainer.getCall(i).args).to.deep.equal([
-          'containerHandle',
-        ]);
-        chai.expect(grpcClient.invoke.getCall(i).args).to.deep.equal([{
-          hostIp: '127.0.0.1',
-          payload: JSON.stringify({ baz: 1 }),
-          userId: 'impersonatedUser',
-          userToken: 'fakeImpersonationToken',
-        }]);
       }
     });
 
@@ -722,7 +796,8 @@ describe(__filename, () => {
       };
       const funcId = 'testFunctionId';
       const funcColStub = {
-        findOne: sinon.stub()
+        findOne: sinon
+          .stub()
           .withArgs(sinon.match({ id: funcId, deletedOn: { $exists: false } }))
           .resolves(),
       };
@@ -735,7 +810,8 @@ describe(__filename, () => {
         handle: 'containerHandle',
       });
       sinon.stub(containerManager, 'releaseFunctionContainer').resolves();
-      sinon.stub(grpcClient, 'invoke')
+      sinon
+        .stub(grpcClient, 'invoke')
         .onFirstCall()
         .rejects(new Error('Could not connect to provided IP'))
         .onSecondCall()
@@ -758,7 +834,8 @@ describe(__filename, () => {
       };
       const funcId = 'testFunctionId';
       const funcColStub = {
-        findOne: sinon.stub()
+        findOne: sinon
+          .stub()
           .withArgs(sinon.match({ id: funcId, deletedOn: { $exists: false } }))
           .resolves({
             fullTagName: 'blah/someTag',
@@ -786,15 +863,20 @@ describe(__filename, () => {
       } catch (err) {
         // Assert
         chai.expect(err.message).to.equal('FakeError');
-        chai.expect(containerManager.readyFunctionContainerForImage.callCount).to.be.equal(1);
-        chai.expect(containerManager.readyFunctionContainerForImage.getCall(0).args).to.deep.equal([
-          'blah/someTag',
-          '1',
-        ]);
-        chai.expect(containerManager.releaseFunctionContainer.callCount).to.be.equal(1);
-        chai.expect(containerManager.releaseFunctionContainer.getCall(0).args).to.deep.equal([
-          'containerHandle',
-        ]);
+        chai
+          .expect(containerManager.readyFunctionContainerForImage.callCount)
+          .to.be.equal(1);
+        chai
+          .expect(
+            containerManager.readyFunctionContainerForImage.getCall(0).args,
+          )
+          .to.deep.equal(['blah/someTag', '1']);
+        chai
+          .expect(containerManager.releaseFunctionContainer.callCount)
+          .to.be.equal(1);
+        chai
+          .expect(containerManager.releaseFunctionContainer.getCall(0).args)
+          .to.deep.equal(['containerHandle']);
         chai.expect(grpcClient.invoke.callCount).to.be.equal(0);
       }
     });
@@ -805,7 +887,8 @@ describe(__filename, () => {
       // Arrange
       const funcId = 'testFunctionId';
       const funcColStub = {
-        findOne: sinon.stub()
+        findOne: sinon
+          .stub()
           .withArgs(sinon.match({ id: funcId, deletedOn: { $exists: false } }))
           .resolves({
             fullTagName: 'blah/someTag',
@@ -866,7 +949,8 @@ describe(__filename, () => {
       const funcId = 'testFunctionId';
       const expectedError = new Error('test error');
       const funcColStub = {
-        findOne: sinon.stub()
+        findOne: sinon
+          .stub()
           .withArgs(sinon.match({ id: funcId, deletedOn: { $exists: false } }))
           .resolves({
             fullTagName: 'blah/someTag',
@@ -906,10 +990,12 @@ describe(__filename, () => {
           },
         ]);
         chai.expect(fakeLogger.warn.callCount).to.be.equal(1);
-        chai.expect(fakeLogger.warn.getCall(0).args).to.deep.equal([
-          { err: expectedError },
-          'Error when removing function.',
-        ]);
+        chai
+          .expect(fakeLogger.warn.getCall(0).args)
+          .to.deep.equal([
+            { err: expectedError },
+            'Error when removing function.',
+          ]);
       }
     });
   });

@@ -23,7 +23,9 @@ describe(__filename, () => {
       const fakeCollection = {};
       fakeConnection.db.returns(fakeDatabase);
       fakeDatabase.collection.returns(fakeCollection);
-      const connectStub = sinon.stub(MongoClient, 'connect').resolves(fakeConnection);
+      const connectStub = sinon
+        .stub(MongoClient, 'connect')
+        .resolves(fakeConnection);
 
       // Act
       repo.getDatabase().then((db) => {
@@ -35,7 +37,9 @@ describe(__filename, () => {
         chai.expect(col).to.equal(fakeCollection);
         const connectCalls = connectStub.getCalls();
         chai.expect(connectCalls.length).to.equal(1);
-        chai.expect(connectCalls[0].args[0]).to.equal('mongodb://127.0.0.1:27017');
+        chai
+          .expect(connectCalls[0].args[0])
+          .to.equal('mongodb://127.0.0.1:27017');
         const dbCalls = fakeConnection.db.getCalls();
         chai.expect(dbCalls.length).to.equal(1);
         chai.expect(dbCalls[0].args[0]).to.equal('mdsCloudDockerMinion');
@@ -55,7 +59,9 @@ describe(__filename, () => {
       const fakeCollection = {};
       fakeConnection.db.returns(fakeDatabase);
       fakeDatabase.collection.returns(fakeCollection);
-      const connectStub = sinon.stub(MongoClient, 'connect').resolves(fakeConnection);
+      const connectStub = sinon
+        .stub(MongoClient, 'connect')
+        .resolves(fakeConnection);
 
       // Act
       repo.getDatabase('some-url').then((db) => {
@@ -131,8 +137,7 @@ describe(__filename, () => {
       };
       sinon.stub(repo, 'getDatabase').resolves({
         close: () => Promise.resolve(),
-        getCollection: sinon.stub()
-          .withArgs('functions').returns(funcColStub),
+        getCollection: sinon.stub().withArgs('functions').returns(funcColStub),
       });
 
       // Act
@@ -140,10 +145,12 @@ describe(__filename, () => {
 
       // Assert
       chai.expect(funcColStub.createIndex.callCount).to.be.equal(1);
-      chai.expect(funcColStub.createIndex.getCall(0).args).to.deep.equal([
-        { deletedOn: 1 },
-        { expireAfterSeconds: expectedExpireAfterSec },
-      ]);
+      chai
+        .expect(funcColStub.createIndex.getCall(0).args)
+        .to.deep.equal([
+          { deletedOn: 1 },
+          { expireAfterSeconds: expectedExpireAfterSec },
+        ]);
     });
   });
 });

@@ -13,7 +13,9 @@ describe(__filename, () => {
 
   describe('getIssuer', () => {
     it('Matches environment variable ORID_PROVIDER_KEY', () => {
-      chai.expect(handlerHelpers.getIssuer()).to.equal(process.env.ORID_PROVIDER_KEY);
+      chai
+        .expect(handlerHelpers.getIssuer())
+        .to.equal(process.env.ORID_PROVIDER_KEY);
     });
   });
 
@@ -24,10 +26,13 @@ describe(__filename, () => {
       process.env.MDS_IDENTITY_URL = 'http://127.0.0.1:1234';
       const url = `${process.env.MDS_IDENTITY_URL}/v1/publicSignature`;
       const getStub = sinon.stub(axios, 'get');
-      getStub.withArgs(url).resolves({ data: { signature: 'public-signature' } });
+      getStub
+        .withArgs(url)
+        .resolves({ data: { signature: 'public-signature' } });
 
       // Act
-      return handlerHelpers.getAppPublicSignature()
+      return handlerHelpers
+        .getAppPublicSignature()
         .then((signature) => {
           // Assert
           chai.expect(signature).to.be.equal('public-signature');
@@ -54,14 +59,13 @@ describe(__filename, () => {
       };
 
       // Act
-      return handlerHelpers.sendResponse(resp)
-        .then(() => {
-          // Assert
-          chai.expect(resp.status.callCount).to.equal(1);
-          chai.expect(resp.status.getCalls()[0].args).to.deep.equal([200]);
-          chai.expect(resp.send.callCount).to.equal(1);
-          chai.expect(resp.send.getCalls()[0].args).to.deep.equal([undefined]);
-        });
+      return handlerHelpers.sendResponse(resp).then(() => {
+        // Assert
+        chai.expect(resp.status.callCount).to.equal(1);
+        chai.expect(resp.status.getCalls()[0].args).to.deep.equal([200]);
+        chai.expect(resp.send.callCount).to.equal(1);
+        chai.expect(resp.send.getCalls()[0].args).to.deep.equal([undefined]);
+      });
     });
 
     it('sends specified body and code when provided', () => {
@@ -72,13 +76,16 @@ describe(__filename, () => {
       };
 
       // Act
-      return handlerHelpers.sendResponse(resp, 400, 'Bad Request Test')
+      return handlerHelpers
+        .sendResponse(resp, 400, 'Bad Request Test')
         .then(() => {
           // Assert
           chai.expect(resp.status.callCount).to.equal(1);
           chai.expect(resp.status.getCalls()[0].args).to.deep.equal([400]);
           chai.expect(resp.send.callCount).to.equal(1);
-          chai.expect(resp.send.getCalls()[0].args).to.deep.equal(['Bad Request Test']);
+          chai
+            .expect(resp.send.getCalls()[0].args)
+            .to.deep.equal(['Bad Request Test']);
         });
     });
   });
@@ -166,7 +173,8 @@ describe(__filename, () => {
       sinon.stub(jwt, 'verify').returns(parsedToken);
 
       // Act
-      return handlerHelpers.validateToken(stubLogger)(req, resp, Promise.resolve.bind(Promise))
+      return handlerHelpers
+        .validateToken(stubLogger)(req, resp, Promise.resolve.bind(Promise))
         .then(() => {
           // Assert
           chai.expect(req.parsedToken).to.equal(parsedToken);
@@ -196,15 +204,15 @@ describe(__filename, () => {
       sinon.stub(jwt, 'verify').returns(parsedToken);
 
       // Act
-      return handlerHelpers.validateToken(stubLogger)(req, resp, Promise.resolve.bind(Promise))
+      return handlerHelpers
+        .validateToken(stubLogger)(req, resp, Promise.resolve.bind(Promise))
         .then(() => {
           // Assert
           chai.expect(req.parsedToken).to.equal(undefined);
           chai.expect(handlerHelpers.sendResponse.callCount).to.equal(1);
-          chai.expect(handlerHelpers.sendResponse.getCalls()[0].args).to.deep.equal([
-            resp,
-            403,
-          ]);
+          chai
+            .expect(handlerHelpers.sendResponse.getCalls()[0].args)
+            .to.deep.equal([resp, 403]);
         });
     });
 
@@ -220,26 +228,27 @@ describe(__filename, () => {
         debug: sinon.stub(),
       };
       sinon.stub(handlerHelpers, 'sendResponse').resolves();
-      sinon.stub(handlerHelpers, 'getAppPublicSignature').throws(new Error('test error'));
+      sinon
+        .stub(handlerHelpers, 'getAppPublicSignature')
+        .throws(new Error('test error'));
 
       // Act
-      return handlerHelpers.validateToken(stubLogger)(req, resp, Promise.resolve.bind(Promise))
+      return handlerHelpers
+        .validateToken(stubLogger)(req, resp, Promise.resolve.bind(Promise))
         .then(() => {
           // Assert
           chai.expect(req.parsedToken).to.equal(undefined);
           chai.expect(handlerHelpers.sendResponse.callCount).to.equal(1);
-          chai.expect(handlerHelpers.sendResponse.getCalls()[0].args).to.deep.equal([
-            resp,
-            403,
-          ]);
+          chai
+            .expect(handlerHelpers.sendResponse.getCalls()[0].args)
+            .to.deep.equal([resp, 403]);
         });
     });
 
     it('Returns 403 when token not present in request', () => {
       // Arrange
       const req = {
-        headers: {
-        },
+        headers: {},
       };
       const resp = {
         setHeader: sinon.stub(),
@@ -248,19 +257,24 @@ describe(__filename, () => {
         debug: sinon.stub(),
       };
       sinon.stub(handlerHelpers, 'sendResponse').resolves();
-      sinon.stub(handlerHelpers, 'getAppPublicSignature').throws(new Error('test error'));
+      sinon
+        .stub(handlerHelpers, 'getAppPublicSignature')
+        .throws(new Error('test error'));
 
       // Act
-      return handlerHelpers.validateToken(stubLogger)(req, resp, Promise.resolve.bind(Promise))
+      return handlerHelpers
+        .validateToken(stubLogger)(req, resp, Promise.resolve.bind(Promise))
         .then(() => {
           // Assert
           chai.expect(req.parsedToken).to.equal(undefined);
           chai.expect(handlerHelpers.sendResponse.callCount).to.equal(1);
-          chai.expect(handlerHelpers.sendResponse.getCalls()[0].args).to.deep.equal([
-            resp,
-            403,
-            'Please include authentication token in header "token"',
-          ]);
+          chai
+            .expect(handlerHelpers.sendResponse.getCalls()[0].args)
+            .to.deep.equal([
+              resp,
+              403,
+              'Please include authentication token in header "token"',
+            ]);
         });
     });
   });
@@ -278,10 +292,17 @@ describe(__filename, () => {
         setHeader: sinon.stub(),
       };
       sinon.stub(handlerHelpers, 'sendResponse').resolves();
-      sinon.stub(handlerHelpers, 'getAppPublicSignature').throws(new Error('test error'));
+      sinon
+        .stub(handlerHelpers, 'getAppPublicSignature')
+        .throws(new Error('test error'));
 
       // Act
-      return handlerHelpers.ensureRequestOrid(true, 'orid')(req, resp, Promise.resolve.bind(Promise))
+      return handlerHelpers
+        .ensureRequestOrid(true, 'orid')(
+          req,
+          resp,
+          Promise.resolve.bind(Promise),
+        )
         .then(() => {
           // Assert
           chai.expect(handlerHelpers.sendResponse.callCount).to.equal(0);
@@ -301,23 +322,27 @@ describe(__filename, () => {
         setHeader: sinon.stub(),
       };
       sinon.stub(handlerHelpers, 'sendResponse').resolves();
-      sinon.stub(handlerHelpers, 'getAppPublicSignature').throws(new Error('test error'));
+      sinon
+        .stub(handlerHelpers, 'getAppPublicSignature')
+        .throws(new Error('test error'));
 
       // Act
-      return handlerHelpers.ensureRequestOrid(true, 'orid')(req, resp, Promise.resolve.bind(Promise))
+      return handlerHelpers
+        .ensureRequestOrid(true, 'orid')(
+          req,
+          resp,
+          Promise.resolve.bind(Promise),
+        )
         .then(() => {
           // Assert
           chai.expect(resp.setHeader.callCount).to.equal(1);
-          chai.expect(resp.setHeader.getCalls()[0].args).to.deep.equal([
-            'content-type',
-            'text/plain',
-          ]);
+          chai
+            .expect(resp.setHeader.getCalls()[0].args)
+            .to.deep.equal(['content-type', 'text/plain']);
           chai.expect(handlerHelpers.sendResponse.callCount).to.equal(1);
-          chai.expect(handlerHelpers.sendResponse.getCalls()[0].args).to.deep.equal([
-            resp,
-            400,
-            'resource not understood',
-          ]);
+          chai
+            .expect(handlerHelpers.sendResponse.getCalls()[0].args)
+            .to.deep.equal([resp, 400, 'resource not understood']);
         });
     });
   });
@@ -348,7 +373,8 @@ describe(__filename, () => {
       sinon.stub(handlerHelpers, 'getOridFromRequest').returns(orid);
 
       // Act
-      return handlerHelpers.canAccessResource('orid')(req, resp, Promise.resolve.bind(Promise))
+      return handlerHelpers
+        .canAccessResource('orid')(req, resp, Promise.resolve.bind(Promise))
         .then(() => {
           // Assert
           chai.expect(handlerHelpers.sendResponse.callCount).to.equal(0);
@@ -384,19 +410,25 @@ describe(__filename, () => {
       sinon.stub(handlerHelpers, 'getOridFromRequest').returns(orid);
 
       // Act
-      return handlerHelpers.canAccessResource({ orid: 'orid', logger })(req, resp, Promise.resolve.bind(Promise))
+      return handlerHelpers
+        .canAccessResource({ orid: 'orid', logger })(
+          req,
+          resp,
+          Promise.resolve.bind(Promise),
+        )
         .then(() => {
           // Assert
           chai.expect(logger.debug.callCount).to.equal(1);
-          chai.expect(logger.debug.getCalls()[0].args).to.deep.equal([
-            { requestAccount: '1001', tokenAccountId: '1003' },
-            'Insufficient privilege for request',
-          ]);
+          chai
+            .expect(logger.debug.getCalls()[0].args)
+            .to.deep.equal([
+              { requestAccount: '1001', tokenAccountId: '1003' },
+              'Insufficient privilege for request',
+            ]);
           chai.expect(handlerHelpers.sendResponse.callCount).to.equal(1);
-          chai.expect(handlerHelpers.sendResponse.getCalls()[0].args).to.deep.equal([
-            resp,
-            403,
-          ]);
+          chai
+            .expect(handlerHelpers.sendResponse.getCalls()[0].args)
+            .to.deep.equal([resp, 403]);
         });
     });
   });
@@ -421,11 +453,10 @@ describe(__filename, () => {
 
       // Act
       const middleware = handlerHelpers.ensureRequestFromSystem(stubLogger);
-      return middleware(req, resp, Promise.resolve.bind(Promise))
-        .then(() => {
-          // Assert
-          chai.expect(handlerHelpers.sendResponse.callCount).to.equal(0);
-        });
+      return middleware(req, resp, Promise.resolve.bind(Promise)).then(() => {
+        // Assert
+        chai.expect(handlerHelpers.sendResponse.callCount).to.equal(0);
+      });
     });
 
     it('Returns 403 when request is not from the system', () => {
@@ -446,17 +477,17 @@ describe(__filename, () => {
       sinon.stub(handlerHelpers, 'sendResponse').resolves();
 
       // Act
-      const middleware = handlerHelpers.ensureRequestFromSystem({ logger: stubLogger });
-      return middleware(req, resp, Promise.resolve.bind(Promise))
-        .then(() => {
-          // Assert
-          chai.expect(handlerHelpers.sendResponse.callCount).to.be.equal(1);
-          chai.expect(stubLogger.debug.callCount).to.be.equal(1);
-          chai.expect(handlerHelpers.sendResponse.getCalls()[0].args).to.deep.equal([
-            resp,
-            403,
-          ]);
-        });
+      const middleware = handlerHelpers.ensureRequestFromSystem({
+        logger: stubLogger,
+      });
+      return middleware(req, resp, Promise.resolve.bind(Promise)).then(() => {
+        // Assert
+        chai.expect(handlerHelpers.sendResponse.callCount).to.be.equal(1);
+        chai.expect(stubLogger.debug.callCount).to.be.equal(1);
+        chai
+          .expect(handlerHelpers.sendResponse.getCalls()[0].args)
+          .to.deep.equal([resp, 403]);
+      });
     });
   });
 });

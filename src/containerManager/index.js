@@ -27,7 +27,10 @@ const self = {
     const containers = await docker.listContainers({
       all: !_.get(options, ['onlyRunning'], false),
     });
-    const filtered = _.filter(containers, (el) => el.Image.indexOf(imageNameFragment) !== -1);
+    const filtered = _.filter(
+      containers,
+      (el) => el.Image.indexOf(imageNameFragment) !== -1,
+    );
     return filtered;
   },
 
@@ -98,12 +101,14 @@ const self = {
         }
       */
       // Remove dead orphaned containers
-      if (!(
-        insp.State.Running
-        || insp.State.Paused
-        || insp.State.Restarting
-        || insp.State.OOMKilled
-        || insp.State.Dead)
+      if (
+        !(
+          insp.State.Running ||
+          insp.State.Paused ||
+          insp.State.Restarting ||
+          insp.State.OOMKilled ||
+          insp.State.Dead
+        )
       ) {
         const stoppedAt = luxon.DateTime.fromISO(insp.State.FinishedAt);
         const diff = stoppedAt.diffNow('seconds');
@@ -116,7 +121,11 @@ const self = {
       // Remove orphaned or runtime exceeded containers
       if (insp.State.Running) {
         const meta = self.containerMetadata[info.Id];
-        const lastCall = _.get(meta, ['lastCall'], luxon.DateTime.fromISO(insp.State.StartedAt));
+        const lastCall = _.get(
+          meta,
+          ['lastCall'],
+          luxon.DateTime.fromISO(insp.State.StartedAt),
+        );
         const diff = lastCall.diffNow('seconds');
         if (Math.abs(diff.seconds) > maxRunningContainerSeconds) {
           self.safeStopContainer(container);
@@ -133,9 +142,17 @@ const self = {
    */
   electExistingContainerToReadyForImage: async (fullImageName) => {
     const logger = globals.getLogger();
-    const existingContainers = await self.findContainersMatchingImage(fullImageName);
-    const runningContainers = _.filter(existingContainers, (e) => e.State.toUpperCase() === 'RUNNING');
-    const exitedContainers = _.filter(existingContainers, (e) => e.State.toUpperCase() === 'EXITED');
+    const existingContainers = await self.findContainersMatchingImage(
+      fullImageName,
+    );
+    const runningContainers = _.filter(
+      existingContainers,
+      (e) => e.State.toUpperCase() === 'RUNNING',
+    );
+    const exitedContainers = _.filter(
+      existingContainers,
+      (e) => e.State.toUpperCase() === 'EXITED',
+    );
 
     const docker = globals.getDockerInterface();
     let container;
@@ -143,26 +160,33 @@ const self = {
       const random = globals.getRandomInt(runningContainers.length);
       const elect = runningContainers[random];
       container = docker.getContainer(elect.Id);
-      logger.trace({
-        fullImageName,
-      }, 'Existing running container found.');
+      logger.trace(
+        {
+          fullImageName,
+        },
+        'Existing running container found.',
+      );
     } else if (exitedContainers.length > 0) {
-      const promises = _.map(exitedContainers, (c) => docker.getContainer(c.Id).inspect());
+      const promises = _.map(exitedContainers, (c) =>
+        docker.getContainer(c.Id).inspect(),
+      );
       const details = await Promise.all(promises);
-      const elect = _.maxBy(
-        details,
-        (e) => luxon.DateTime.fromISO(e.State.FinishedAt).toMillis(),
+      const elect = _.maxBy(details, (e) =>
+        luxon.DateTime.fromISO(e.State.FinishedAt).toMillis(),
       );
 
       // Give a slight buffer on re-using a stopped container
       const stoppedAt = luxon.DateTime.fromISO(elect.State.FinishedAt);
       const diff = stoppedAt.diffNow('seconds');
-      if (Math.abs(diff.seconds) < (maxStoppedContainerSeconds - 5)) {
+      if (Math.abs(diff.seconds) < maxStoppedContainerSeconds - 5) {
         container = docker.getContainer(elect.Id);
         await self.safeStartContainer(container);
-        logger.trace({
-          fullImageName,
-        }, 'Existing stopped container found and restarted.');
+        logger.trace(
+          {
+            fullImageName,
+          },
+          'Existing stopped container found and restarted.',
+        );
       }
     }
 
@@ -177,30 +201,46 @@ const self = {
     await self.simpleThrottle.acquire(fullImageName);
     let returnData;
     try {
-      let container = await self.electExistingContainerToReadyForImage(fullImageName);
+      let container = await self.electExistingContainerToReadyForImage(
+        fullImageName,
+      );
       if (!container) {
         const docker = globals.getDockerInterface();
         container = await docker.createContainer({
           Image: `${fullTagName}:${tagVersion}`,
           name: `mds-sf-${globals.generateRandomString(24)}`,
           HostConfig: {
-            NetworkMode: _.get(process.env, ['MDS_FN_CONTAINER_NETWORK'], 'bridge'),
+            NetworkMode: _.get(
+              process.env,
+              ['MDS_FN_CONTAINER_NETWORK'],
+              'bridge',
+            ),
           },
         });
         await self.safeStartContainer(container);
-        logger.trace({
-          fullImageName,
-        }, 'No container found. New container started.');
+        logger.trace(
+          {
+            fullImageName,
+          },
+          'No container found. New container started.',
+        );
       }
 
       const customNetwork = helpers.getEnvVar('MDS_FN_CONTAINER_NETWORK', '');
-      const ip = await container.inspect().then((info) => (customNetwork === ''
-        ? info.NetworkSettings.IPAddress
-        : info.NetworkSettings.Networks[customNetwork].IPAddress));
-      logger.trace({
-        fullImageName,
-        ip,
-      }, 'Discovering IP for container');
+      const ip = await container
+        .inspect()
+        .then((info) =>
+          customNetwork === ''
+            ? info.NetworkSettings.IPAddress
+            : info.NetworkSettings.Networks[customNetwork].IPAddress,
+        );
+      logger.trace(
+        {
+          fullImageName,
+          ip,
+        },
+        'Discovering IP for container',
+      );
       if (ip) {
         const extendedMeta = _.get(self.containerMetadata, [container.id], {});
         extendedMeta.openCalls = _.get(extendedMeta, ['openCalls'], 0) + 1;
@@ -212,13 +252,19 @@ const self = {
           handle: container.id,
           ip,
         };
-        logger.trace({
-          fullImageName,
-          extendedMeta,
-        }, 'Metadata for IP found');
+        logger.trace(
+          {
+            fullImageName,
+            extendedMeta,
+          },
+          'Metadata for IP found',
+        );
       }
     } catch (err) {
-      logger.error({ fullTagName, tagVersion, err }, 'A problem occurred while trying to ready the container for image');
+      logger.error(
+        { fullTagName, tagVersion, err },
+        'A problem occurred while trying to ready the container for image',
+      );
     } finally {
       self.simpleThrottle.release(fullImageName);
     }
