@@ -6,6 +6,7 @@ import { credentials, ServiceError } from '@grpc/grpc-js';
 jest.mock('../../../presentation/logging', () => ({
   getLogger: () => ({
     debug: jest.fn(),
+    trace: jest.fn(),
   }),
 }));
 

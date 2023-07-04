@@ -2,6 +2,9 @@ module.exports = {
   // The port that the HTTP interface will listen upon for requests
   apiPort: 8888,
 
+  // When true, enables the swagger interface. This should only be enabled for non-production environments.
+  enableSwagger: false,
+
   // Connection details for the private docker repository
   registry: {
     address: '127.0.0.1:5000',

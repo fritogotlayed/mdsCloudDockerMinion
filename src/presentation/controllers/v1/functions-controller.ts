@@ -1,7 +1,7 @@
 import { FastifyInstance } from 'fastify';
 import {
   BuildFunctionRequestBody,
-  BuildFunctionRequestBodySchema,
+  BuildFunctionResponseBodySchema,
   CreateFunctionRequestBody,
   CreateFunctionRequestBodySchema,
   CreateFunctionResponseBodySchema,
@@ -11,7 +11,7 @@ import {
   ExecuteFunctionRequestBodySchema,
   ExecuteFunctionRequestParams,
   ExecuteFunctionRequestParamsSchema,
-  ExecuteFunctionResponseBodySchema,
+  ListAllFunctionResponseBodySchema,
 } from '../../schemas/function';
 import { generateRandomString } from '../../../utils';
 import { DateTime } from 'luxon';
@@ -36,6 +36,8 @@ export function functionsController(app: FastifyInstance) {
     '/createFunction',
     {
       schema: {
+        description: 'Create a function',
+        tags: ['Functions'],
         body: CreateFunctionRequestBodySchema,
         response: {
           201: CreateFunctionResponseBodySchema,
@@ -81,9 +83,15 @@ export function functionsController(app: FastifyInstance) {
     '/all',
     {
       schema: {
+        description: 'List all functions',
+        tags: ['Functions'],
+        headers: {
+          token: {
+            type: 'string',
+          },
+        },
         response: {
-          // TODO: Implement
-          // 200: CreateFunctionResponseBodySchema,
+          200: ListAllFunctionResponseBodySchema,
         },
       },
     },
@@ -119,9 +127,17 @@ export function functionsController(app: FastifyInstance) {
     '/buildFunction',
     {
       schema: {
+        description: 'Build a function',
+        tags: ['Functions'],
+        headers: {
+          token: {
+            type: 'string',
+          },
+        },
+        // TODO: Figure out how to clear the below note so swagger docs are correct
         // body: BuildFunctionRequestBodySchema, // NOTE: Cannot do body validation here due to file upload stuff
         response: {
-          201: BuildFunctionRequestBodySchema,
+          201: BuildFunctionResponseBodySchema,
         },
       },
     },
@@ -217,11 +233,20 @@ export function functionsController(app: FastifyInstance) {
     '/executeFunction/:functionId',
     {
       schema: {
+        description: 'Execute a function',
+        tags: ['Functions'],
+        headers: {
+          token: {
+            type: 'string',
+          },
+        },
         body: ExecuteFunctionRequestBodySchema,
         params: ExecuteFunctionRequestParamsSchema,
-        response: {
-          201: ExecuteFunctionResponseBodySchema,
-        },
+        // NOTE: When adding schema validation below for the swagger docs, the
+        // unknown format of the user response causes the response payload to be empty.
+        // response: {
+        //   200: ExecuteFunctionResponseBodySchema,
+        // },
       },
     },
     async (request, response) => {
@@ -264,6 +289,13 @@ export function functionsController(app: FastifyInstance) {
     '/:functionId',
     {
       schema: {
+        description: 'Delete a function',
+        tags: ['Functions'],
+        headers: {
+          token: {
+            type: 'string',
+          },
+        },
         params: DeleteFunctionRequestParamsSchema,
       },
     },

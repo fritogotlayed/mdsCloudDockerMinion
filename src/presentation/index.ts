@@ -8,6 +8,8 @@ import { asFunction, AwilixContainer, Lifetime } from 'awilix';
 import { ContainerManager } from '../core/container-manager';
 import { Logic } from '../core/logic';
 import { initialize } from './logging';
+import fastifySwagger from '@fastify/swagger';
+import fastifySwaggerUi from '@fastify/swagger-ui';
 
 export function defaultDependencyInjection(
   diContainer: AwilixContainer<Cradle>,
@@ -52,6 +54,22 @@ export async function buildApp(
   };
   const server = fastify(fastifyOptions);
   server.withTypeProvider<TypeBoxTypeProvider>();
+
+  if (config.get<boolean>('enableSwagger')) {
+    server.register(fastifySwagger, {
+      swagger: {
+        produces: ['application/json'],
+        consumes: ['application/json'],
+      },
+    });
+
+    server.register(fastifySwaggerUi, {
+      uiConfig: {
+        docExpansion: 'list',
+        deepLinking: false,
+      },
+    });
+  }
 
   server.register(fastifyAwilixPlugin, {
     disposeOnClose: true,
