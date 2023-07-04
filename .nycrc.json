@@ -9,6 +9,7 @@
     "src/**/*.js"
   ],
   "exclude": [
+    "src/config/*.js",
     "src/handlers/app_shutdown.js",
     "src/templates/*",
     "src/**/*.test.js"

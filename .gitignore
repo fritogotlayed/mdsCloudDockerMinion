@@ -104,3 +104,7 @@ dist
 .tern-port
 
 .vscode/
+# typescript outputs
+dist/
+
+config/localdev.js
