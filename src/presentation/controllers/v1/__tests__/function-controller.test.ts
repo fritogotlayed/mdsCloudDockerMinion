@@ -182,10 +182,18 @@ describe('functionController test', () => {
         {
           id: 'func1',
           name: 'Function 1',
+          accountId: '1001',
+          created: new Date().toISOString(),
+          maxProcesses: 1,
+          nextVersion: 1,
         },
         {
           id: 'func2',
           name: 'Function 2',
+          accountId: '1001',
+          created: new Date().toISOString(),
+          maxProcesses: 1,
+          nextVersion: 1,
         },
       ];
       logicMock.listFunctions.mockResolvedValue(data);
@@ -200,8 +208,8 @@ describe('functionController test', () => {
       });
 
       // Assert
-      expect(response.statusCode).toBe(200);
       expect(JSON.parse(response.body)).toEqual(data);
+      expect(response.statusCode).toBe(200);
     });
 
     it('when unhandled error is thrown, responds with 500 and reference number', async () => {
@@ -402,10 +410,10 @@ describe('functionController test', () => {
       });
 
       // Assert
-      expect(response.statusCode).toBe(200);
       expect(JSON.parse(response.body)).toEqual({
         sample: 'response',
       });
+      expect(response.statusCode).toBe(200);
       expect(logicMock.executeFunction).toHaveBeenCalledWith('abc123', {
         testBody: 'input',
       });

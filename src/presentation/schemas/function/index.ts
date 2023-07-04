@@ -6,3 +6,4 @@ export * from './delete-function-request-params-schema';
 export * from './execute-function-request-body-schema';
 export * from './execute-function-request-params-schema';
 export * from './execute-function-response-body-schema';
+export * from './list-all-function-response-body-schema';

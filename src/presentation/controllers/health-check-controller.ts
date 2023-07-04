@@ -8,6 +8,8 @@ export function healthCheckController(app: FastifyInstance) {
     '/',
     {
       schema: {
+        description: 'Health check',
+        tags: ['X-HIDDEN'],
         response: {
           200: GetHealthResponseSchema,
         },
