@@ -16,6 +16,7 @@ COPY ./config/default.js ./config/default.js
 RUN npm install --only=prod
 
 COPY --from=builder /usr/src/app/dist .
+COPY --from=builder /usr/src/app/src/infrastructure/grpc/protos/*.proto ./infrastructure/grpc/protos/
 EXPOSE 8888
 
 CMD [ "node", "./server.js" ]
