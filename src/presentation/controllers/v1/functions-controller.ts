@@ -15,7 +15,6 @@ import {
 } from '../../schemas/function';
 import { generateRandomString } from '../../../utils';
 import { DateTime } from 'luxon';
-import { Logic } from '../../../core/logic';
 import { tmpdir } from 'os';
 import { join } from 'path';
 import { pipeline } from 'stream/promises';
@@ -46,7 +45,7 @@ export function functionsController(app: FastifyInstance) {
     },
     async (request, response) => {
       try {
-        const logic = request.diScope.resolve<Logic>('logic');
+        const { logic } = request.services;
         const createResult = await logic.createFunction({
           name: request.body.name,
           accountId: request.body.accountId,
@@ -97,7 +96,7 @@ export function functionsController(app: FastifyInstance) {
     },
     async (request, response) => {
       try {
-        const logic = request.diScope.resolve<Logic>('logic');
+        const { logic } = request.services;
         const functions = await logic.listFunctions();
 
         response.status(200);
@@ -193,7 +192,7 @@ export function functionsController(app: FastifyInstance) {
         await pipeline(file.file, createWriteStream(localFilePath));
 
         // TODO: Figure out what metadata to move to DB from request body
-        const logic = request.diScope.resolve<Logic>('logic');
+        const { logic } = request.services;
         await logic.buildFunction({
           functionId: functionId as string,
           localFilePath,
@@ -251,7 +250,7 @@ export function functionsController(app: FastifyInstance) {
     },
     async (request, response) => {
       try {
-        const logic = request.diScope.resolve<Logic>('logic');
+        const { logic } = request.services;
         const result = await logic.executeFunction(
           request.params.functionId,
           request.body as string,
@@ -302,7 +301,7 @@ export function functionsController(app: FastifyInstance) {
     async (request, response) => {
       const logger = getLogger();
       try {
-        const logic = request.diScope.resolve<Logic>('logic');
+        const { logic } = request.services;
         await logic.removeFunction(request.params.functionId);
         response.status(200);
         response.send();
