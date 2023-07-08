@@ -85,6 +85,16 @@ export async function buildApp(
   await server.register(multipart);
   await server.register(rootRouter);
 
+  server.addHook('onRequest', (request, reply, done) => {
+    // We pre-resolve all the diScope services here so that various code editor "find all references" works properly.
+    const logic = request.diScope.resolve<Logic>('logic');
+    request.services = {
+      logic,
+    };
+
+    done();
+  });
+
   // TODO: Should this live here
   initialize(server.log);
 
