@@ -355,9 +355,7 @@ describe('logic', () => {
     });
   });
 
-  // TODO: Figure out how to test this and pass on CI
-  // https://github.com/MadDonkeySoftware/mdsCloudDockerMinion/issues/24
-  describe.skip('buildFunction', () => {
+  describe('buildFunction', () => {
     const eventData = {
       functionId: 'testFuncId',
       localFilePath: '/tmp/abcdef',
